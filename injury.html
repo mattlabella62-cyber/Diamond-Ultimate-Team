@@ -250,11 +250,12 @@
     if (!user) { window.location.href = 'index.html'; return }
     currentUser = user
 
-    const { data: team } = await supabase
-      .from('teams')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+ const { data: teamData } = await supabase
+  .from('teams')
+  .select('*')
+  .eq('user_id', user.id)
+  .limit(1)
+const team = teamData?.[0] || null
     if (!team) return
     currentTeam = team
 
