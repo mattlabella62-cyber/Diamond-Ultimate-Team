@@ -616,7 +616,7 @@
     currentUser = user
 
     // Load team
-    const { data: team } = await sb
+    const { data: team } = await supabase
       .from('teams')
       .select('*')
       .eq('user_id', user.id)
@@ -635,7 +635,7 @@
 
   // ── Load my roster
   async function loadMyRoster() {
-    const { data } = await sb
+    const { data } = await supabase
       .from('rosters')
       .select('*, players(*)')
       .eq('team_id', currentTeam.id)
@@ -647,14 +647,14 @@
     const grid = document.getElementById('poolGrid')
 
     // Get all rostered player IDs across the league
-    const { data: rostered } = await sb
+    const { data: rostered } = await supabase
       .from('rosters')
       .select('player_id')
     const takenIds = (rostered || []).map(r => r.player_id)
 
     // Fetch bronze + upside players not on any roster
     // We target 36 — split bronze/sleeper similar to auction logic
-    let query = sb
+    let query = supabase
       .from('players')
       .select('*')
       .in('tier', ['bronze', 'upside'])
@@ -826,7 +826,7 @@
 
   // ── Load my claims this week
   async function loadMyClaims() {
-    const { data } = await sb
+    const { data } = await supabase
       .from('injury_claims')
       .select('*, added:added_player_id(name,position,team), dropped:dropped_player_id(name,position,team)')
       .eq('team_id', currentTeam.id)
