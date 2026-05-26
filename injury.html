@@ -567,13 +567,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-  // ── Pull from your shared supabase.js if you prefer; inline here for portability
-  // Replace with your actual URL + anon key (or import from ./supabase.js)
-  const SUPABASE_URL  = window.__SUPABASE_URL__  || 'YOUR_SUPABASE_URL'
-  const SUPABASE_ANON = window.__SUPABASE_ANON__ || 'YOUR_SUPABASE_ANON_KEY'
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
+  import { supabase } from './supabase.js'
 
   const CLAIM_COST   = 30
   const POOL_SIZE    = 36
