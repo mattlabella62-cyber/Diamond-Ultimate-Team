@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Injury Pool — DiamondUT</title>
+  <style>
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161e;
+      --surface2:  #1a1e2a;
+      --border:    #2a2f3d;
+      --accent:    #f5a623;
+      --accent2:   #e8c84a;
+      --red:       #e05252;
+      --green:     #4caf7d;
+      --blue:      #4a90d9;
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --sidebar-w: 168px;
+
+      --bronze-bg:   #3d2010;
+      --bronze-clr:  #cd7f32;
+      --silver-bg:   #1e2535;
+      --silver-clr:  #a8b8cc;
+      --gold-bg:     #2d2000;
+      --gold-clr:    #f5c842;
+      --plat-bg:     #1a1040;
+      --plat-clr:    #b48aff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 16px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-diamond {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .logo-text { font-size: 13px; font-weight: 800; letter-spacing: 1px; color: var(--accent); vertical-align: middle; }
+    .logo-sub  { font-size: 9px; color: var(--muted); display: block; margin-top: 2px; letter-spacing: 0.5px; }
+
+    .sidebar-section { padding: 14px 10px 4px; }
+    .sidebar-section-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; padding: 0 4px 6px; }
+
+    .sidebar-link {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 7px;
+      color: var(--muted); font-size: 12px; font-weight: 500;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 1px;
+      position: relative;
+    }
+    .sidebar-link:hover { background: var(--surface2); color: var(--text); }
+    .sidebar-link.active { background: rgba(245,166,35,0.12); color: var(--accent); }
+    .sidebar-link .icon { font-size: 14px; width: 18px; text-align: center; }
+    .badge {
+      margin-left: auto; background: var(--red);
+      color: #fff; font-size: 9px; font-weight: 700;
+      border-radius: 10px; padding: 1px 5px; min-width: 16px; text-align: center;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; flex: 1; }
+    .topbar h1 span { color: var(--red); }
+    .week-badge {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px;
+    }
+    .sport-badge {
+      background: var(--blue); border-radius: 6px;
+      padding: 4px 10px; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--accent); color: #000;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900;
+    }
+
+    /* ── INFO BAR ── */
+    .info-bar {
+      display: flex; align-items: center; gap: 24px;
+      padding: 12px 24px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .info-item { display: flex; flex-direction: column; gap: 2px; }
+    .info-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+    .info-value { font-size: 14px; font-weight: 800; color: var(--text); }
+    .info-value.coins { color: var(--accent); }
+    .info-value.green { color: var(--green); }
+    .info-sep { width: 1px; height: 30px; background: var(--border); }
+
+    .info-notice {
+      margin-left: auto;
+      background: rgba(224,82,82,0.1);
+      border: 1px solid rgba(224,82,82,0.3);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 10px; font-weight: 700; color: var(--red);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── CONTENT ── */
+    .content { padding: 24px; flex: 1; }
+
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; }
+    .pool-count {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 11px; font-weight: 700; color: var(--muted);
+    }
+    .section-sub {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--muted); text-transform: uppercase;
+      margin-left: auto;
+    }
+
+    /* ── PLAYER GRID ── */
+    .pool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .player-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .player-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245,166,35,0.15);
+    }
+    .player-card.selected-add {
+      border-color: var(--green);
+      box-shadow: 0 0 0 2px rgba(76,175,125,0.3);
+    }
+
+    .card-art {
+      position: relative;
+      height: 110px;
+      overflow: hidden;
+    }
+    .card-art-bronze { background: radial-gradient(ellipse at 60% 30%, #7a3a10 0%, #3d1a06 60%, #1a0a02 100%); }
+    .card-art-silver { background: radial-gradient(ellipse at 60% 30%, #3a4a60 0%, #1e2535 60%, #0d1018 100%); }
+    .card-art-gold   { background: radial-gradient(ellipse at 60% 30%, #5a4200 0%, #2d2000 60%, #100c00 100%); }
+    .card-art-plat   { background: radial-gradient(ellipse at 60% 30%, #3a1a60 0%, #1a1040 60%, #080510 100%); }
+
+    .card-art img {
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      max-height: 100%;
+      width: auto;
+      opacity: 0.92;
+    }
+
+    .tier-badge {
+      position: absolute; top: 6px; left: 6px;
+      font-size: 8px; font-weight: 900; letter-spacing: 1px;
+      padding: 2px 6px; border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tier-bronze { background: var(--bronze-bg); color: var(--bronze-clr); border: 1px solid var(--bronze-clr); }
+    .tier-silver { background: var(--silver-bg); color: var(--silver-clr); border: 1px solid var(--silver-clr); }
+    .tier-gold   { background: var(--gold-bg);   color: var(--gold-clr);   border: 1px solid var(--gold-clr); }
+    .tier-plat   { background: var(--plat-bg);   color: var(--plat-clr);   border: 1px solid var(--plat-clr); }
+
+    .tier-pts {
+      position: absolute; top: 6px; right: 6px;
+      font-size: 11px; font-weight: 900; color: #fff;
+    }
+
+    .card-info {
+      padding: 8px 8px 10px;
+    }
+    .card-name {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.3px; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .card-meta {
+      display: flex; gap: 4px; align-items: center;
+    }
+    .card-pos {
+      font-size: 8px; font-weight: 700; color: var(--accent);
+      background: rgba(245,166,35,0.1); border-radius: 3px; padding: 1px 4px;
+    }
+    .card-team {
+      font-size: 8px; color: var(--muted);
+    }
+
+    .card-claim-btn {
+      width: 100%; padding: 7px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-top: none;
+      color: var(--muted);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-transform: uppercase;
+    }
+    .player-card:hover .card-claim-btn,
+    .player-card.selected-add .card-claim-btn {
+      background: rgba(76,175,125,0.1);
+      color: var(--green);
+      border-color: var(--green);
+    }
+    .player-card.selected-add .card-claim-btn { background: rgba(76,175,125,0.2); }
+
+    /* ── DROP PANEL ── */
+    .drop-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+      display: none;
+    }
+    .drop-panel.visible { display: block; }
+
+    .drop-panel-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .drop-panel-header h3 { font-size: 14px; font-weight: 800; }
+    .adding-pill {
+      background: rgba(76,175,125,0.12);
+      border: 1px solid rgba(76,175,125,0.4);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 10px; font-weight: 700; color: var(--green);
+    }
+    .cost-pill {
+      margin-left: auto;
+      background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.3);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 10px; font-weight: 700; color: var(--accent);
+    }
+
+    .drop-sub {
+      font-size: 11px; color: var(--muted); margin-bottom: 14px;
+    }
+
+    .roster-drop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .roster-drop-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .roster-drop-card:hover { border-color: var(--red); background: rgba(224,82,82,0.05); }
+    .roster-drop-card.selected-drop {
+      border-color: var(--red);
+      background: rgba(224,82,82,0.1);
+      box-shadow: 0 0 0 2px rgba(224,82,82,0.2);
+    }
+    .drop-card-slot {
+      font-size: 8px; font-weight: 700; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .drop-card-name {
+      font-size: 10px; font-weight: 800; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .drop-card-meta { display: flex; gap: 4px; align-items: center; }
+    .drop-card-pos {
+      font-size: 8px; font-weight: 700; color: var(--accent);
+      background: rgba(245,166,35,0.1); border-radius: 3px; padding: 1px 4px;
+    }
+    .drop-card-team { font-size: 8px; color: var(--muted); }
+
+    .confirm-row {
+      display: flex; align-items: center; gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .confirm-summary {
+      flex: 1; font-size: 11px; color: var(--muted);
+    }
+    .confirm-summary strong { color: var(--text); }
+    .confirm-summary .arrow { color: var(--red); margin: 0 4px; }
+
+    .btn-cancel {
+      padding: 9px 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--muted); font-size: 11px; font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+
+    .btn-confirm {
+      padding: 9px 20px;
+      background: var(--green);
+      border: none; border-radius: 7px;
+      color: #000; font-size: 11px; font-weight: 900;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.15s, transform 0.1s;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .btn-confirm.ready { opacity: 1; pointer-events: all; }
+    .btn-confirm.ready:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-confirm:active { transform: scale(0.97); }
+
+    /* ── RECENT CLAIMS TABLE ── */
+    .claims-section { margin-top: 8px; }
+    .claims-section h3 { font-size: 13px; font-weight: 800; margin-bottom: 14px; }
+
+    .claims-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .claims-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 9px; font-weight: 700; letter-spacing: 1px;
+      color: var(--muted); text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .claims-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(42,47,61,0.5);
+      color: var(--text);
+    }
+    .claims-table tr:last-child td { border-bottom: none; }
+    .claims-table tr:hover td { background: var(--surface2); }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .status-claimed { background: rgba(76,175,125,0.15); color: var(--green); }
+    .status-dropped { background: rgba(224,82,82,0.15); color: var(--red); }
+
+    /* ── LOADING / EMPTY ── */
+    .loading-state, .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .loading-state .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 12px; font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      z-index: 999;
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      max-width: 280px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error   { border-color: var(--red);   color: var(--red); }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-diamond"></span>
+    <span class="logo-text">DIAMONDUT</span>
+    <span class="logo-sub">MLB · SEASON 2026</span>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Main</div>
+    <a href="dashboard.html" class="sidebar-link"><span class="icon">⚡</span> Dashboard</a>
+    <a href="roster.html"    class="sidebar-link"><span class="icon">👤</span> My Roster</a>
+    <a href="auction.html"   class="sidebar-link"><span class="icon">🏷️</span> Auction House</a>
+    <a href="#"              class="sidebar-link"><span class="icon">👑</span> Legendary</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">League</div>
+    <a href="#"              class="sidebar-link"><span class="icon">🏆</span> Standings</a>
+    <a href="#"              class="sidebar-link"><span class="icon">🔄</span> Trade Center <span class="badge">2</span></a>
+    <a href="injury.html"    class="sidebar-link active"><span class="icon">🩹</span> Injury Pool</a>
+    <a href="pack.html"      class="sidebar-link"><span class="icon">📦</span> Open Pack</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Account</div>
+    <a href="#" class="sidebar-link"><span class="icon">🎨</span> Cosmetics</a>
+    <a href="#" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <h1>Injury <span>Pool</span></h1>
+    <span class="week-badge" id="weekBadge">WEEK — OF —</span>
+    <span class="sport-badge" id="sportBadge">MLB</span>
+    <div class="avatar" id="avatarEl">?</div>
+  </div>
+
+  <!-- INFO BAR -->
+  <div class="info-bar">
+    <div class="info-item">
+      <span class="info-label">Available Players</span>
+      <span class="info-value" id="poolCountEl">—</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <span class="info-label">Claim Cost</span>
+      <span class="info-value coins">30 coins</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <span class="info-label">Your Coins</span>
+      <span class="info-value coins" id="coinsEl">—</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <span class="info-label">Claims This Week</span>
+      <span class="info-value green" id="claimsCountEl">—</span>
+    </div>
+    <div class="info-notice">⚠️ Live injury status coming soon — pool is unrostered players</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- Pool Header -->
+    <div class="section-header">
+      <span class="section-title">🩹 Emergency Pool</span>
+      <span class="pool-count" id="poolBadge">0 players</span>
+      <span class="section-sub">Instant Claim · 30 Coins</span>
+    </div>
+
+    <!-- Pool Grid -->
+    <div class="pool-grid" id="poolGrid">
+      <div class="loading-state" style="grid-column:1/-1">
+        <div class="spinner"></div>
+        <p>Loading pool...</p>
+      </div>
+    </div>
+
+    <!-- Drop Panel (shown when add player selected) -->
+    <div class="drop-panel" id="dropPanel">
+      <div class="drop-panel-header">
+        <h3>Who are you dropping?</h3>
+        <span class="adding-pill" id="addingPill">Adding: —</span>
+        <span class="cost-pill">Cost: 30 coins</span>
+      </div>
+      <p class="drop-sub">Select a player from your roster to drop. They will be released immediately.</p>
+
+      <div class="roster-drop-grid" id="rosterDropGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="confirm-row">
+        <div class="confirm-summary" id="confirmSummary">
+          Select a player to drop to continue.
+        </div>
+        <button class="btn-cancel" id="btnCancel">Cancel</button>
+        <button class="btn-confirm" id="btnConfirm">Confirm Claim — 30 coins</button>
+      </div>
+    </div>
+
+    <!-- Recent Claims -->
+    <div class="claims-section">
+      <h3>My Recent Claims</h3>
+      <div id="claimsTableWrap">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>No claims yet this week.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+  // ── Pull from your shared supabase.js if you prefer; inline here for portability
+  // Replace with your actual URL + anon key (or import from ./supabase.js)
+  const SUPABASE_URL  = window.__SUPABASE_URL__  || 'YOUR_SUPABASE_URL'
+  const SUPABASE_ANON = window.__SUPABASE_ANON__ || 'YOUR_SUPABASE_ANON_KEY'
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
+
+  const CLAIM_COST   = 30
+  const POOL_SIZE    = 36
+  const WEEK_NUMBER  = 21
+
+  // ── State
+  let currentUser   = null
+  let currentTeam   = null
+  let myRoster      = []    // players on my team
+  let poolPlayers   = []    // 36 unrostered players
+  let myClaims      = []    // this week's claims
+  let selectedAdd   = null  // player being added
+  let selectedDrop  = null  // player being dropped
+
+  // ── Silhouette images (copy exact base64 vars from roster.html)
+  const PITCHER_POS = ['SP','RP','P']
+  // Placeholder SVG data URIs — replace with your actual base64 from roster.html
+  const BATTER_IMG  = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 120'><rect width='80' height='120' fill='none'/><circle cx='40' cy='22' r='12' fill='rgba(255,255,255,0.6)'/><ellipse cx='40' cy='75' rx='22' ry='35' fill='rgba(255,255,255,0.6)'/></svg>`
+  const PITCHER_IMG = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 120'><rect width='80' height='120' fill='none'/><circle cx='40' cy='22' r='12' fill='rgba(255,255,255,0.6)'/><ellipse cx='40' cy='75' rx='20' ry='35' fill='rgba(255,255,255,0.6)'/><line x1='40' y1='55' x2='70' y2='40' stroke='rgba(255,255,255,0.6)' stroke-width='5' stroke-linecap='round'/></svg>`
+
+  function getImg(player) {
+    return PITCHER_POS.includes(player.position) ? PITCHER_IMG : BATTER_IMG
+  }
+
+  function tierClass(tier) {
+    const map = { platinum:'plat', gold:'gold', silver:'silver', bronze:'bronze' }
+    return map[tier] || 'bronze'
+  }
+  function tierPts(tier) {
+    const map = { platinum:100, gold:60, silver:25, bronze:10 }
+    return map[tier] || 10
+  }
+
+  // ── Toast
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.className = `toast ${type} show`
+    setTimeout(() => t.className = 'toast', 3000)
+  }
+
+  // ── Init
+  async function init() {
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) { window.location.href = 'index.html'; return }
+    currentUser = user
+
+    // Load team
+    const { data: team } = await sb
+      .from('teams')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+    if (!team) return
+    currentTeam = team
+
+    // Update topbar
+    document.getElementById('avatarEl').textContent = (team.name || 'T')[0].toUpperCase()
+    document.getElementById('sportBadge').textContent = team.sport || 'MLB'
+    document.getElementById('weekBadge').textContent  = `WEEK ${WEEK_NUMBER}`
+    document.getElementById('coinsEl').textContent    = `${team.coins ?? 500}`
+
+    await Promise.all([loadMyRoster(), loadPool(), loadMyClaims()])
+  }
+
+  // ── Load my roster
+  async function loadMyRoster() {
+    const { data } = await sb
+      .from('rosters')
+      .select('*, players(*)')
+      .eq('team_id', currentTeam.id)
+    myRoster = (data || []).map(r => ({ ...r.players, slot: r.slot, roster_id: r.id }))
+  }
+
+  // ── Load injury pool (36 unrostered players)
+  async function loadPool() {
+    const grid = document.getElementById('poolGrid')
+
+    // Get all rostered player IDs across the league
+    const { data: rostered } = await sb
+      .from('rosters')
+      .select('player_id')
+    const takenIds = (rostered || []).map(r => r.player_id)
+
+    // Fetch bronze + upside players not on any roster
+    // We target 36 — split bronze/sleeper similar to auction logic
+    let query = sb
+      .from('players')
+      .select('*')
+      .in('tier', ['bronze', 'upside'])
+      .eq('sport', currentTeam.sport || 'MLB')
+
+    if (takenIds.length > 0) {
+      query = query.not('id', 'in', `(${takenIds.join(',')})`)
+    }
+
+    const { data: players } = await query.limit(POOL_SIZE)
+    poolPlayers = players || []
+
+    // Update counts
+    document.getElementById('poolCountEl').textContent = poolPlayers.length
+    document.getElementById('poolBadge').textContent   = `${poolPlayers.length} players`
+
+    renderPool()
+  }
+
+  // ── Render pool cards
+  function renderPool() {
+    const grid = document.getElementById('poolGrid')
+    if (!poolPlayers.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">🏟️</div>
+        <p>No players available right now.</p>
+      </div>`
+      return
+    }
+
+    grid.innerHTML = poolPlayers.map(p => {
+      const tc  = tierClass(p.tier)
+      const pts = tierPts(p.tier)
+      const img = getImg(p)
+      const isSelected = selectedAdd?.id === p.id
+      return `
+        <div class="player-card ${isSelected ? 'selected-add' : ''}" data-id="${p.id}" onclick="selectAdd('${p.id}')">
+          <div class="card-art card-art-${tc}">
+            <img src="${img}" alt="${p.name}" />
+            <span class="tier-badge tier-${tc}">${p.tier || 'bronze'}</span>
+            <span class="tier-pts">${pts}</span>
+          </div>
+          <div class="card-info">
+            <div class="card-name">${p.name}</div>
+            <div class="card-meta">
+              <span class="card-pos">${p.position}</span>
+              <span class="card-team">${p.team || ''}</span>
+            </div>
+          </div>
+          <button class="card-claim-btn">${isSelected ? '✓ Selected' : 'Select'}</button>
+        </div>`
+    }).join('')
+  }
+
+  // ── Select player to add
+  window.selectAdd = function(playerId) {
+    selectedAdd  = poolPlayers.find(p => p.id === playerId) || null
+    selectedDrop = null
+    renderPool()
+    renderDropPanel()
+  }
+
+  // ── Render drop panel
+  function renderDropPanel() {
+    const panel = document.getElementById('dropPanel')
+    if (!selectedAdd) { panel.classList.remove('visible'); return }
+    panel.classList.add('visible')
+
+    document.getElementById('addingPill').textContent = `Adding: ${selectedAdd.name}`
+
+    const grid = document.getElementById('rosterDropGrid')
+    grid.innerHTML = myRoster.map(p => {
+      const isSelected = selectedDrop?.id === p.id
+      return `
+        <div class="roster-drop-card ${isSelected ? 'selected-drop' : ''}"
+             onclick="selectDrop('${p.id}')">
+          <div class="drop-card-slot">${p.slot || '—'}</div>
+          <div class="drop-card-name">${p.name}</div>
+          <div class="drop-card-meta">
+            <span class="drop-card-pos">${p.position}</span>
+            <span class="drop-card-team">${p.team || ''}</span>
+          </div>
+        </div>`
+    }).join('')
+
+    updateConfirmRow()
+
+    document.getElementById('btnCancel').onclick  = cancelSelection
+    document.getElementById('btnConfirm').onclick = confirmClaim
+  }
+
+  // ── Select player to drop
+  window.selectDrop = function(playerId) {
+    selectedDrop = myRoster.find(p => p.id === playerId) || null
+    renderDropPanel()
+  }
+
+  function updateConfirmRow() {
+    const summary = document.getElementById('confirmSummary')
+    const btn     = document.getElementById('btnConfirm')
+    if (selectedAdd && selectedDrop) {
+      summary.innerHTML = `<strong>${selectedDrop.name}</strong><span class="arrow">→ DROP</span> &nbsp; <strong>${selectedAdd.name}</strong><span class="arrow"> → ADD</span> &nbsp; (−30 coins)`
+      btn.classList.add('ready')
+    } else {
+      summary.textContent = 'Select a player to drop to continue.'
+      btn.classList.remove('ready')
+    }
+  }
+
+  function cancelSelection() {
+    selectedAdd  = null
+    selectedDrop = null
+    document.getElementById('dropPanel').classList.remove('visible')
+    renderPool()
+  }
+
+  // ── Confirm claim
+  async function confirmClaim() {
+    if (!selectedAdd || !selectedDrop) return
+    if ((currentTeam.coins ?? 0) < CLAIM_COST) {
+      showToast('Not enough coins!', 'error'); return
+    }
+
+    const btn = document.getElementById('btnConfirm')
+    btn.textContent = 'Processing...'
+    btn.classList.remove('ready')
+
+    try {
+      // 1. Remove dropped player from roster
+      await sb.from('rosters').delete().eq('id', selectedDrop.roster_id)
+
+      // 2. Add new player to roster (bench slot or first eligible)
+      await sb.from('rosters').insert({
+        team_id:   currentTeam.id,
+        player_id: selectedAdd.id,
+        league_id: currentTeam.league_id,
+        slot:      selectedDrop.slot, // inherit the dropped player's slot
+      })
+
+      // 3. Deduct coins
+      const newCoins = (currentTeam.coins ?? 500) - CLAIM_COST
+      await sb.from('teams').update({ coins: newCoins }).eq('id', currentTeam.id)
+      currentTeam.coins = newCoins
+      document.getElementById('coinsEl').textContent = newCoins
+
+      // 4. Log the claim
+      await sb.from('injury_claims').insert({
+        team_id:        currentTeam.id,
+        league_id:      currentTeam.league_id,
+        added_player_id:   selectedAdd.id,
+        dropped_player_id: selectedDrop.id,
+        coins_spent:    CLAIM_COST,
+        week_number:    WEEK_NUMBER,
+      })
+
+      showToast(`✓ ${selectedAdd.name} added! ${selectedDrop.name} dropped.`, 'success')
+
+      // Reset & reload
+      cancelSelection()
+      await Promise.all([loadMyRoster(), loadPool(), loadMyClaims()])
+
+    } catch (err) {
+      console.error(err)
+      showToast('Something went wrong. Try again.', 'error')
+      btn.textContent = 'Confirm Claim — 30 coins'
+      btn.classList.add('ready')
+    }
+  }
+
+  // ── Load my claims this week
+  async function loadMyClaims() {
+    const { data } = await sb
+      .from('injury_claims')
+      .select('*, added:added_player_id(name,position,team), dropped:dropped_player_id(name,position,team)')
+      .eq('team_id', currentTeam.id)
+      .eq('week_number', WEEK_NUMBER)
+      .order('created_at', { ascending: false })
+
+    myClaims = data || []
+    document.getElementById('claimsCountEl').textContent = myClaims.length
+    renderClaimsTable()
+  }
+
+  function renderClaimsTable() {
+    const wrap = document.getElementById('claimsTableWrap')
+    if (!myClaims.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No claims yet this week.</p></div>`
+      return
+    }
+
+    wrap.innerHTML = `
+      <table class="claims-table">
+        <thead>
+          <tr>
+            <th>Added</th>
+            <th>Pos</th>
+            <th>Dropped</th>
+            <th>Pos</th>
+            <th>Cost</th>
+            <th>When</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${myClaims.map(c => `
+            <tr>
+              <td><span class="status-pill status-claimed">+ ${c.added?.name || '—'}</span></td>
+              <td>${c.added?.position || '—'}</td>
+              <td><span class="status-pill status-dropped">− ${c.dropped?.name || '—'}</span></td>
+              <td>${c.dropped?.position || '—'}</td>
+              <td style="color:var(--accent)">${c.coins_spent} coins</td>
+              <td style="color:var(--muted)">${new Date(c.created_at).toLocaleDateString()}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`
+  }
+
+  init()
+</script>
+</body>
+</html>
