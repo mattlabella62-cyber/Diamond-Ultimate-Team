@@ -379,24 +379,69 @@
     document.getElementById('coinsTopEl').textContent = c
   }
 
+  // ── AUTO-ROTATION: get current week number since season start ──
+  function getCurrentWeek() {
+    const SEASON_START = new Date('2025-09-04') // adjust if needed
+    const now = new Date()
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000
+    return Math.max(0, Math.floor((now - SEASON_START) / msPerWeek))
+  }
+
+  // ── SET is_legendary_active FLAG on matching player ──
+  async function syncLegendaryActiveFlag(featuredCard, previousCard) {
+    // Clear previous week's flag
+    if (previousCard) {
+      await supabase
+        .from('players')
+        .update({ is_legendary_active: false })
+        .eq('name', previousCard.player_name)
+        .eq('sport', previousCard.sport)
+    }
+    // Set this week's flag
+    if (featuredCard && !featuredCard.is_claimed) {
+      await supabase
+        .from('players')
+        .update({ is_legendary_active: true })
+        .eq('name', featuredCard.player_name)
+        .eq('sport', featuredCard.sport)
+    }
+  }
+
   // ── LOAD LEGENDARY CARDS ──
   async function loadLegendaryCards() {
     const sport = localStorage.getItem('activeSport') || 'MLB'
+
+    // Load all unclaimed + active cards ordered consistently
     const { data, error } = await supabase
       .from('legendary_players')
       .select('*')
       .eq('sport', sport)
       .eq('is_active', true)
-      .order('is_claimed', { ascending: true })
-      .order('year', { ascending: false })
+      .order('year', { ascending: true })
+      .order('player_name', { ascending: true })
 
     if (error) { console.error(error); return }
-    legendaryCards = data || []
 
-    const available = legendaryCards.filter(c => !c.is_claimed).length
-    const claimed   = legendaryCards.filter(c => c.is_claimed).length
-    document.getElementById('availableCountEl').textContent = available
-    document.getElementById('claimedCountEl').textContent   = claimed
+    const allCards = data || []
+    const unclaimed = allCards.filter(c => !c.is_claimed)
+    const claimed   = allCards.filter(c => c.is_claimed)
+
+    // Pick featured card based on week number, cycling through unclaimed
+    const week = getCurrentWeek()
+    let featuredCard = null
+    if (unclaimed.length > 0) {
+      const idx = week % unclaimed.length
+      featuredCard = unclaimed[idx]
+      const prevIdx = ((week - 1) % unclaimed.length + unclaimed.length) % unclaimed.length
+      const previousCard = unclaimed[prevIdx] !== featuredCard ? unclaimed[prevIdx] : null
+      await syncLegendaryActiveFlag(featuredCard, previousCard)
+    }
+
+    // Only show the featured card (plus claimed cards for history)
+    legendaryCards = featuredCard ? [featuredCard, ...claimed] : claimed
+
+    document.getElementById('availableCountEl').textContent = featuredCard ? 1 : 0
+    document.getElementById('claimedCountEl').textContent   = claimed.length
 
     renderCards()
   }
