@@ -481,18 +481,11 @@ body {
     <div class="three-col">
       <div class="panel">
         <div class="panel-head"><span class="panel-title">Live Feed</span><div class="live-indicator"><div class="live-dot"></div><span class="live-text">LIVE</span></div></div>
-        <div class="feed-item"><div class="feed-icon">💣</div><div><div class="feed-main"><strong>S. Ohtani</strong> hit a solo HR — <span class="feed-pts">+50 pts legendary bonus!</span></div><div class="feed-time">2 min ago · LAD vs SF</div></div></div>
-        <div class="feed-item"><div class="feed-icon">⚾</div><div><div class="feed-main"><strong>F. Freeman</strong> 2-for-3, RBI double — <span class="feed-pts">+18 pts</span></div><div class="feed-time">11 min ago · LAD vs SF</div></div></div>
-        <div class="feed-item"><div class="feed-icon">🔥</div><div><div class="feed-main"><strong>C. Burnes</strong> 7 Ks through 5 IP — <span class="feed-pts">+21 pts</span></div><div class="feed-time">34 min ago · BAL vs BOS</div></div></div>
-        <div class="feed-item"><div class="feed-icon">🏥</div><div><div class="feed-main"><strong>J. Ramirez</strong> placed on IL — <span class="feed-alert">check injury pool</span></div><div class="feed-time">1 hr ago</div></div></div>
+        <div id="liveFeedContainer" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:16px;">Loading...</div>
       </div>
       <div class="panel">
-        <div class="panel-head"><span class="panel-title">Auction House</span><a class="panel-link" href="#">View All →</a></div>
-        <div class="auction-item"><div class="auction-badge platinum">PT</div><div class="auction-info"><div class="auction-name">R. Devers</div><div class="auction-pos">3B · BOS</div></div><div class="auction-meta"><div class="auction-floor">Floor: 60</div><div class="auction-time">2D 4H</div></div><button class="bid-btn">Bid</button></div>
-        <div class="auction-item"><div class="auction-badge gold">GD</div><div class="auction-info"><div class="auction-name">N. Arenado</div><div class="auction-pos">3B · STL</div></div><div class="auction-meta"><div class="auction-floor">Floor: 40</div><div class="auction-time">2D 4H</div></div><button class="bid-btn">Bid</button></div>
-        <div class="auction-item"><div class="auction-badge silver">SV</div><div class="auction-info"><div class="auction-name">M. Machado</div><div class="auction-pos">3B · SD</div></div><div class="auction-meta"><div class="auction-floor">Floor: 30</div><div class="auction-time">2D 4H</div></div><button class="bid-btn">Bid</button></div>
-        <div class="auction-item"><div class="auction-badge gold">GD</div><div class="auction-info"><div class="auction-name">P. Alonso</div><div class="auction-pos">1B · NYM</div></div><div class="auction-meta"><div class="auction-floor">Floor: 45</div><div class="auction-time">2D 4H</div></div><button class="bid-btn">Bid</button></div>
-        <div class="auction-item"><div class="auction-badge silver">SV</div><div class="auction-info"><div class="auction-name">L. Castillo</div><div class="auction-pos">SP · SEA</div></div><div class="auction-meta"><div class="auction-floor">Floor: 35</div><div class="auction-time">2D 4H</div></div><button class="bid-btn">Bid</button></div>
+        <div class="panel-head"><span class="panel-title">Auction House</span><a class="panel-link" href="auction.html">View All →</a></div>
+        <div id="auctionContainer" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:16px;">Loading...</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:20px;">
         <div class="panel">
@@ -611,11 +604,12 @@ async function loadDashboard() {
     return
   }
 
-  // Detect sport from players
+  // Detect sport from players and persist so all widgets use it
   const sport = roster.find(r => r.players?.sport)?.players?.sport || 'MLB'
+  localStorage.setItem('activeSport', sport)
   document.getElementById('sportPill').textContent = sport
-  document.getElementById('sportPill').style.color = sport === 'MLB' ? 'var(--blue)' : 'var(--green)'
-  document.getElementById('sportPill').style.borderColor = sport === 'MLB' ? 'var(--blue)' : 'var(--green)'
+  document.getElementById('sportPill').style.color = sport === 'NFL' ? 'var(--green)' : 'var(--blue)'
+  document.getElementById('sportPill').style.borderColor = sport === 'NFL' ? 'var(--green)' : 'var(--blue)'
 
   // Split batters / pitchers
   const batters  = roster.filter(r => r.players && BATTER_POS.includes(r.players.position))
@@ -639,10 +633,104 @@ async function loadDashboard() {
   document.querySelector('.cap-bar-fill').style.width  = capPct + '%'
 }
 
-loadDashboard()
+// ── LIVE FEED ──
+async function loadLiveFeed() {
+  const leagueId = localStorage.getItem('activeLeagueId') || ''
+  const container = document.getElementById('liveFeedContainer')
+  if (!container || !leagueId) return
+  try {
+    const { data: events } = await supabase
+      .from('live_feed')
+      .select('*, players(name, position, team)')
+      .eq('league_id', leagueId)
+      .order('created_at', { ascending: false })
+      .limit(8)
+    if (!events || events.length === 0) {
+      container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">No activity yet this week.</div>'
+      return
+    }
+    const iconMap = { score: '💣', hit: '⚾', pitch: '🔥', injury: '🏥', legendary: '👑' }
+    container.innerHTML = events.map(e => {
+      const icon = iconMap[e.event_type] || '📊'
+      const playerName = e.players ? '<strong>' + e.players.name + '</strong>' : '<strong>Player</strong>'
+      const pts = e.points ? '<span class="feed-pts">+' + e.points + ' pts' + (e.is_legendary_bonus ? ' legendary bonus!' : '') + '</span>' : ''
+      const alert = e.is_injury ? '<span class="feed-alert">check injury pool</span>' : ''
+      const ago = timeAgo(e.created_at)
+      const game = e.game_info || ''
+      return '<div class="feed-item"><div class="feed-icon">' + icon + '</div><div><div class="feed-main">' + playerName + ' ' + (e.description || '') + ' ' + pts + alert + '</div><div class="feed-time">' + ago + (game ? ' · ' + game : '') + '</div></div></div>'
+    }).join('')
+  } catch(err) {
+    container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">No league activity yet.</div>'
+  }
+}
+
+function timeAgo(ts) {
+  if (!ts) return ''
+  const mins = Math.floor((Date.now() - new Date(ts)) / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + ' min ago'
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return hrs + ' hr ago'
+  return Math.floor(hrs/24) + ' d ago'
+}
+
+// ── AUCTION HOUSE ──
+// Shows top 5 free agents (not on any roster in this league) ranked by tier value
+async function loadAuctionHouse() {
+  const leagueId = localStorage.getItem('activeLeagueId') || ''
+  const sport    = localStorage.getItem('activeSport') || 'MLB'
+  const container = document.getElementById('auctionContainer')
+  if (!container || !leagueId) return
+  try {
+    // Get all player IDs already on a roster in this league
+    const { data: rostered } = await supabase
+      .from('rosters')
+      .select('player_id, teams!inner(league_id)')
+      .eq('teams.league_id', leagueId)
+      .eq('is_active', true)
+    const takenIds = (rostered || []).map(r => r.player_id).filter(Boolean)
+
+    // Get top available players for this sport, sorted by tier_value desc
+    let query = supabase
+      .from('players')
+      .select('id, name, position, team, tier, tier_value')
+      .eq('sport', sport)
+      .order('tier_value', { ascending: false })
+      .limit(20)
+    if (takenIds.length > 0) query = query.not('id', 'in', '(' + takenIds.join(',') + ')')
+    const { data: available } = await query
+
+    const players = (available || []).slice(0, 5)
+    if (players.length === 0) {
+      container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">No free agents available.</div>'
+      return
+    }
+
+    const tierClass = { Platinum: 'platinum', Gold: 'gold', Silver: 'silver', Bronze: 'bronze' }
+    const tierAbbr  = { Platinum: 'PT', Gold: 'GD', Silver: 'SV', Bronze: 'BR' }
+    container.innerHTML = players.map(p => {
+      const cls  = tierClass[p.tier] || 'silver'
+      const abbr = tierAbbr[p.tier] || 'SV'
+      return '<div class="auction-item"><div class="auction-badge ' + cls + '">' + abbr + '</div><div class="auction-info"><div class="auction-name">' + p.name + '</div><div class="auction-pos">' + p.position + ' · ' + p.team + '</div></div><div class="auction-meta"><div class="auction-floor">Value: ' + (p.tier_value || 0) + '</div></div></div>'
+    }).join('')
+  } catch(err) {
+    container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">Unavailable.</div>'
+  }
+}
+
+// ── STARTUP: load in order so activeSport is set before widgets run ──
+async function init() {
+  await loadDashboard()
+  // activeSport + leagueId + teamId now set — fire everything
+  loadRerollStatus()
+  loadLegendaryWidget()
+  loadLiveFeed()
+  loadAuctionHouse()
+}
+init()
 
 // ── LEGENDARY WIDGET ──
-;(async function loadLegendaryWidget() {
+async function loadLegendaryWidget() {
   try {
     const leagueId = localStorage.getItem('activeLeagueId') || ''
     const teamId   = localStorage.getItem('activeTeamId')   || ''
@@ -734,7 +822,7 @@ loadDashboard()
   } catch(e) {
     console.error('Legendary widget error:', e)
   }
-})()
+}
 </script>
 </body>
 </html>
