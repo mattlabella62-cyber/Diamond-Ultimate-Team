@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DiamondUT — Join League</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --gold: #F5C518; --gold2: #FFE066; --gold-glow: rgba(245,197,24,0.3);
+  --red: #E8433B; --green: #27C96A; --blue: #3B8BF5;
+  --bg: #060810; --surface: #0F1218; --surface2: #151B25;
+  --border: #1E2535; --border2: #283044;
+  --text: #E8ECF4; --muted: #5A6A82; --muted2: #3A4558;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-body); min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(245,197,24,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(59,139,245,0.05) 0%, transparent 50%);
+}
+.card {
+  width: 100%; max-width: 480px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+.card-header {
+  padding: 28px 36px 22px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(160deg, rgba(59,139,245,0.06), transparent);
+}
+.logo-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.logo-diamond { width: 38px; height: 38px; background: linear-gradient(135deg, var(--gold), #FF8C00); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.logo-name { font-family: var(--font-display); font-size: 26px; letter-spacing: 3px; color: var(--gold); }
+.card-title { font-family: var(--font-display); font-size: 22px; letter-spacing: 2px; color: var(--text); }
+.card-sub { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-top: 4px; }
+
+.card-body { padding: 32px 36px; }
+
+/* code input */
+.code-wrap { margin-bottom: 24px; }
+.code-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+.code-input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 16px 20px;
+  font-family: var(--font-mono); font-size: 22px; font-weight: 700;
+  letter-spacing: 6px; color: var(--gold); text-transform: uppercase;
+  outline: none; text-align: center; transition: border-color 0.2s;
+}
+.code-input:focus { border-color: var(--gold); }
+.code-input::placeholder { color: var(--muted2); letter-spacing: 4px; font-size: 16px; }
+
+/* league preview */
+.league-preview {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;
+  display: none;
+}
+.league-preview.visible { display: block; }
+.preview-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; color: var(--text); margin-bottom: 8px; }
+.preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.preview-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+.preview-item-label { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.preview-item-val { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text); margin-top: 3px; }
+.preview-full { background: rgba(39,201,106,0.08); border-color: rgba(232,67,59,0.3); }
+.preview-full .preview-item-val { color: var(--red); }
+
+/* team name */
+.team-wrap { margin-bottom: 24px; display: none; }
+.team-wrap.visible { display: block; }
+.team-input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 14px 20px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 600;
+  color: var(--text); outline: none; transition: border-color 0.2s;
+}
+.team-input:focus { border-color: var(--gold); }
+
+/* error */
+.error-msg { font-family: var(--font-mono); font-size: 11px; color: var(--red); margin-bottom: 16px; display: none; padding: 10px 14px; background: rgba(232,67,59,0.08); border: 1px solid rgba(232,67,59,0.3); border-radius: 8px; }
+.error-msg.visible { display: block; }
+
+/* buttons */
+.btn-row { display: flex; gap: 10px; }
+.btn-find {
+  flex: 1; padding: 14px; background: var(--blue); border: none;
+  border-radius: 10px; color: white; font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-find:hover { opacity: 0.85; }
+.btn-join {
+  flex: 2; padding: 14px; background: var(--gold); border: none;
+  border-radius: 10px; color: var(--bg); font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+  transition: opacity 0.15s; display: none;
+}
+.btn-join.visible { display: block; }
+.btn-join:hover { opacity: 0.85; }
+.btn-join:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-back {
+  padding: 14px 20px; background: transparent; border: 1px solid var(--border2);
+  border-radius: 10px; color: var(--muted); font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+  text-decoration: none; display: flex; align-items: center;
+}
+.btn-back:hover { border-color: var(--text); color: var(--text); }
+
+/* success */
+.success-state { text-align: center; padding: 32px 0; display: none; }
+.success-state.visible { display: block; }
+.success-icon { font-size: 56px; margin-bottom: 12px; }
+.success-title { font-family: var(--font-display); font-size: 28px; letter-spacing: 3px; color: var(--green); margin-bottom: 8px; }
+.success-sub { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 24px; }
+.btn-go {
+  display: inline-block; padding: 14px 32px; background: var(--gold);
+  color: var(--bg); font-family: var(--font-mono); font-size: 12px;
+  font-weight: 700; letter-spacing: 2px; border-radius: 10px;
+  text-decoration: none; transition: opacity 0.15s;
+}
+.btn-go:hover { opacity: 0.85; }
+
+.divider { text-align: center; padding: 20px 0; }
+.divider span { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); }
+.create-link { display: block; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-decoration: none; }
+.create-link:hover { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo-wrap">
+      <div class="logo-diamond"></div>
+      <div class="logo-name">DIAMONDUT</div>
+    </div>
+    <div class="card-title">JOIN A LEAGUE</div>
+    <div class="card-sub">ENTER YOUR INVITE CODE TO JOIN A FRIEND'S LEAGUE</div>
+  </div>
+
+  <div class="card-body">
+    <!-- main form -->
+    <div id="mainForm">
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="code-wrap">
+        <div class="code-label">Invite Code</div>
+        <input class="code-input" id="codeInput" placeholder="XXXX-XXXX" maxlength="12" oninput="onCodeInput()" onkeydown="if(event.key==='Enter') findLeague()"/>
+      </div>
+
+      <!-- league preview (shows after code lookup) -->
+      <div class="league-preview" id="leaguePreview">
+        <div class="preview-name" id="previewName">—</div>
+        <div class="preview-grid">
+          <div class="preview-item"><div class="preview-item-label">Sport</div><div class="preview-item-val" id="previewSport">—</div></div>
+          <div class="preview-item"><div class="preview-item-label">Mode</div><div class="preview-item-val" id="previewMode">—</div></div>
+          <div class="preview-item"><div class="preview-item-label">Teams</div><div class="preview-item-val" id="previewTeams">—</div></div>
+          <div class="preview-item" id="previewFullItem"><div class="preview-item-label">Status</div><div class="preview-item-val" id="previewStatus">Open</div></div>
+        </div>
+      </div>
+
+      <!-- team name (shows after preview) -->
+      <div class="team-wrap" id="teamWrap">
+        <div class="code-label">Your Team Name</div>
+        <input class="team-input" id="teamNameInput" placeholder="Enter your team name..." maxlength="30"/>
+      </div>
+
+      <div class="btn-row">
+        <a class="btn-back" href="dashboard.html">← BACK</a>
+        <button class="btn-find" id="btnFind" onclick="findLeague()">🔍 FIND LEAGUE</button>
+        <button class="btn-join visible" id="btnJoin" onclick="joinLeague()" style="display:none">✓ JOIN LEAGUE</button>
+      </div>
+    </div>
+
+    <!-- success -->
+    <div class="success-state" id="successState">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">YOU'RE IN!</div>
+      <div class="success-sub" id="successSub">Welcome to the league! Open your starter pack to get players.</div>
+      <a class="btn-go" href="pack.html">OPEN STARTER PACK →</a>
+    </div>
+
+    <div class="divider"><span>── OR ──</span></div>
+    <a class="create-link" href="create-league.html">Create your own league →</a>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from './supabase.js'
+
+let foundLeague = null
+let currentUser = null
+
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = 'login.html'; return }
+  currentUser = user
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg')
+  el.textContent = msg
+  el.classList.add('visible')
+}
+function hideError() { document.getElementById('errorMsg').classList.remove('visible') }
+
+window.onCodeInput = function() {
+  // Reset preview if code changes
+  document.getElementById('leaguePreview').classList.remove('visible')
+  document.getElementById('teamWrap').classList.remove('visible')
+  document.getElementById('btnJoin').style.display = 'none'
+  document.getElementById('btnFind').style.display = ''
+  foundLeague = null
+  hideError()
+}
+
+window.findLeague = async function() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase()
+  if (!code) { showError('Please enter an invite code.'); return }
+  hideError()
+
+  const btn = document.getElementById('btnFind')
+  btn.textContent = 'SEARCHING...'
+  btn.disabled = true
+
+  const { data: league, error } = await supabase
+    .from('leagues')
+    .select('*, teams(id)')
+    .eq('invite_code', code)
+    .single()
+
+  btn.textContent = '🔍 FIND LEAGUE'
+  btn.disabled = false
+
+  if (error || !league) { showError('No league found with that code. Check the code and try again.'); return }
+
+  // Check if already in this league
+  const alreadyIn = (league.teams || []).some(t => t.user_id === currentUser?.id)
+  if (alreadyIn) { showError('You are already in this league!'); return }
+
+  const teamCount = (league.teams || []).length
+  const isFull = teamCount >= (league.max_teams || 10)
+
+  foundLeague = league
+  document.getElementById('previewName').textContent   = league.name || 'League'
+  document.getElementById('previewSport').textContent  = league.sport || 'MLB'
+  document.getElementById('previewMode').textContent   = (league.mode || 'weekly').toUpperCase()
+  document.getElementById('previewTeams').textContent  = `${teamCount} / ${league.max_teams || 10}`
+  document.getElementById('previewStatus').textContent = isFull ? 'FULL' : 'OPEN'
+
+  const fullItem = document.getElementById('previewFullItem')
+  if (isFull) {
+    fullItem.classList.add('preview-full')
+    showError('This league is full and not accepting new teams.')
+  } else {
+    fullItem.classList.remove('preview-full')
+  }
+
+  document.getElementById('leaguePreview').classList.add('visible')
+
+  if (!isFull) {
+    document.getElementById('teamWrap').classList.add('visible')
+    document.getElementById('btnJoin').style.display = ''
+    document.getElementById('btnFind').style.display = 'none'
+  }
+}
+
+window.joinLeague = async function() {
+  if (!foundLeague) return
+  const teamName = document.getElementById('teamNameInput').value.trim()
+  if (!teamName) { showError('Please enter a team name.'); return }
+  hideError()
+
+  const btn = document.getElementById('btnJoin')
+  btn.textContent = 'JOINING...'
+  btn.disabled = true
+
+  try {
+    // Create team in the league
+    const { data: team, error: teamErr } = await supabase.from('teams').insert({
+      league_id: foundLeague.id,
+      user_id:   currentUser.id,
+      team_name: teamName,
+      coins:     500
+    }).select().single()
+
+    if (teamErr) throw teamErr
+
+    // Set active league/team
+    localStorage.setItem('activeLeagueId', foundLeague.id)
+    localStorage.setItem('activeTeamId',   team.id)
+    localStorage.setItem('activeSport',    foundLeague.sport || 'MLB')
+    localStorage.setItem('packPending',    'true')
+
+    document.getElementById('successSub').textContent = `Welcome to ${foundLeague.name}! Open your starter pack to get players.`
+    document.getElementById('mainForm').style.display   = 'none'
+    document.getElementById('successState').classList.add('visible')
+  } catch(e) {
+    console.error(e)
+    showError('Failed to join league. Try again.')
+    btn.textContent = '✓ JOIN LEAGUE'
+    btn.disabled = false
+  }
+}
+
+init()
+</script>
+</body>
+</html>
