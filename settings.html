@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Settings — DiamondUT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --gold: #F5C518; --gold2: #FFE066; --gold-glow: rgba(245,197,24,0.3);
+  --red: #E8433B; --green: #27C96A; --blue: #3B8BF5;
+  --bg: #060810; --bg2: #0A0D14; --surface: #0F1218;
+  --surface2: #151B25; --surface3: #1C2333;
+  --border: #1E2535; --border2: #283044;
+  --text: #E8ECF4; --muted: #5A6A82; --muted2: #3A4558;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:230px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.logo-wrap{padding:22px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-diamond{width:28px;height:28px;background:linear-gradient(135deg,var(--gold),#FF8C00);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+.logo-name{font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--gold)}
+.logo-sub{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+.nav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted2);padding:10px 8px 5px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:1px 8px;text-decoration:none;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;position:relative;border:1px solid transparent}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(245,197,24,0.1);color:var(--gold);border:1px solid rgba(245,197,24,0.2)}
+.nav-item.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 2px 2px 0}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;font-family:var(--font-mono);font-size:9px;background:var(--red);color:white;padding:2px 6px;border-radius:99px;font-weight:700}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid var(--border)}
+.coin-label{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.coin-amount{font-family:var(--font-display);font-size:34px;color:var(--gold);line-height:1.1;margin-top:2px}
+
+/* ── MAIN ── */
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:58px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:var(--font-display);font-size:22px;letter-spacing:3px;color:var(--text);flex:1}
+.topbar-title span{color:var(--gold)}
+.week-pill{font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);padding:5px 12px;border-radius:99px}
+.sport-badge{font-family:var(--font-mono);font-size:11px;font-weight:700;background:var(--blue);color:white;padding:5px 12px;border-radius:7px;letter-spacing:1px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--red));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;color:var(--bg)}
+
+/* ── CONTENT LAYOUT ── */
+.content{display:flex;gap:24px;padding:24px;flex:1;max-width:1100px;width:100%}
+.settings-nav{width:200px;flex-shrink:0}
+.settings-body{flex:1;min-width:0}
+
+/* ── SETTINGS NAV ── */
+.snav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.snav-item:hover{background:var(--surface2);color:var(--text)}
+.snav-item.active{background:rgba(245,197,24,0.08);color:var(--gold)}
+.snav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted2);padding:14px 14px 6px;text-transform:uppercase}
+.commissioner-tag{font-family:var(--font-mono);font-size:8px;color:var(--gold);background:rgba(245,197,24,0.12);padding:2px 5px;border-radius:3px;margin-left:auto}
+
+/* ── SETTINGS PANELS ── */
+.panel{display:none}
+.panel.active{display:block}
+
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.section-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.section-title{font-family:var(--font-display);font-size:16px;letter-spacing:2px;color:var(--text)}
+.section-sub{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:3px}
+.commissioner-badge{font-family:var(--font-mono);font-size:9px;color:var(--gold);background:rgba(245,197,24,0.12);border:1px solid rgba(245,197,24,0.3);padding:3px 8px;border-radius:99px}
+.viewer-badge{font-family:var(--font-mono);font-size:9px;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);padding:3px 8px;border-radius:99px}
+.section-body{padding:20px}
+
+/* ── FORM ELEMENTS ── */
+.form-row{margin-bottom:18px}
+.form-row:last-child{margin-bottom:0}
+.form-label{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--gold)}
+.form-input:disabled{opacity:0.5;cursor:not-allowed}
+.form-select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;cursor:pointer;transition:border-color 0.2s;appearance:none}
+.form-select:focus{border-color:var(--gold)}
+.form-select:disabled{opacity:0.5;cursor:not-allowed}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-hint{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:5px}
+
+/* ── INVITE CODE ── */
+.invite-code-wrap{display:flex;gap:10px;align-items:center}
+.invite-code-display{flex:1;background:var(--surface2);border:1px solid rgba(245,197,24,0.3);border-radius:8px;padding:12px 16px;font-family:var(--font-mono);font-size:20px;font-weight:700;letter-spacing:6px;color:var(--gold);text-align:center}
+.btn-copy{padding:12px 18px;background:rgba(245,197,24,0.1);border:1px solid rgba(245,197,24,0.3);border-radius:8px;color:var(--gold);font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn-copy:hover{background:rgba(245,197,24,0.2)}
+.btn-copy.copied{background:rgba(39,201,106,0.1);border-color:rgba(39,201,106,0.3);color:var(--green)}
+
+/* ── BUTTONS ── */
+.btn-save{padding:10px 22px;background:var(--gold);color:var(--bg);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:1px;border:none;border-radius:8px;cursor:pointer;transition:opacity 0.15s}
+.btn-save:hover{opacity:0.85}
+.btn-save:disabled{opacity:0.3;cursor:not-allowed}
+.btn-danger{padding:10px 22px;background:transparent;color:var(--red);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:1px;border:1px solid var(--red);border-radius:8px;cursor:pointer;transition:all 0.15s}
+.btn-danger:hover{background:rgba(232,67,59,0.1)}
+.btn-secondary{padding:10px 22px;background:var(--surface2);color:var(--text);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:1px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;transition:all 0.15s}
+.btn-secondary:hover{border-color:var(--text)}
+.btn-row{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+/* ── TEAM LIST (commissioner remove) ── */
+.team-list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.team-list-item:last-child{border-bottom:none}
+.team-avatar-sm{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;color:white;flex-shrink:0}
+.team-list-name{flex:1;font-size:13px;font-weight:600}
+.team-list-meta{font-family:var(--font-mono);font-size:9px;color:var(--muted)}
+.you-tag{font-family:var(--font-mono);font-size:8px;color:var(--gold);background:rgba(245,197,24,0.12);padding:2px 5px;border-radius:3px}
+.commissioner-crown{font-size:12px}
+
+/* ── WEEK CONTROL ── */
+.week-control{display:flex;align-items:center;gap:16px}
+.week-display{font-family:var(--font-display);font-size:40px;color:var(--gold);line-height:1;min-width:60px;text-align:center}
+.week-btns{display:flex;flex-direction:column;gap:6px}
+.week-btn{padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s}
+.week-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── DANGER ZONE ── */
+.danger-zone{background:rgba(232,67,59,0.04);border:1px solid rgba(232,67,59,0.2);border-radius:12px;padding:20px;margin-top:0}
+.danger-title{font-family:var(--font-display);font-size:16px;letter-spacing:2px;color:var(--red);margin-bottom:4px}
+.danger-sub{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-bottom:16px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-family:var(--font-mono);font-size:11px;font-weight:700;z-index:9999;transform:translateY(80px);opacity:0;transition:all 0.3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+/* ── READONLY INFO ── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.info-item-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.info-item-val{font-size:14px;font-weight:600;color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-diamond"></div>
+    <div><div class="logo-name">DIAMONDUT</div><div class="logo-sub" id="sportSubLabel">MLB · SEASON 2026</div></div>
+  </div>
+  <div class="nav-section">Main</div>
+  <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+  <a class="nav-item" href="roster.html"><span class="nav-icon">🃏</span> My Roster</a>
+  <a class="nav-item" href="auction.html"><span class="nav-icon">🏷️</span> Auction House</a>
+  <a class="nav-item" href="legendary.html"><span class="nav-icon">👑</span> Legendary</a>
+  <div class="nav-section">League</div>
+  <a class="nav-item" href="standings.html"><span class="nav-icon">🏆</span> Standings</a>
+  <a class="nav-item" href="trade.html"><span class="nav-icon">🔄</span> Trade Center<span class="nav-badge" id="tradeBadge" style="display:none">0</span></a>
+  <a class="nav-item" href="injury.html"><span class="nav-icon">🏥</span> Injury Pool</a>
+  <a class="nav-item" href="pack.html"><span class="nav-icon">📦</span> Open Pack</a>
+  <div class="nav-section">Account</div>
+  <a class="nav-item" href="#"><span class="nav-icon">🎨</span> Cosmetics</a>
+  <a class="nav-item active" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  <div class="sidebar-bottom">
+    <div class="coin-label">Coin Balance</div>
+    <div class="coin-amount" id="coinEl">—</div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">LEAGUE <span>SETTINGS</span></div>
+    <div class="week-pill" id="weekPill">WEEK — OF 18</div>
+    <div class="sport-badge" id="sportBadge">NFL</div>
+    <div class="user-avatar" id="avatarEl">?</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── SETTINGS NAV ── -->
+    <div class="settings-nav">
+      <div class="snav-section">League</div>
+      <button class="snav-item active" onclick="showPanel('league-info')">📋 League Info</button>
+      <button class="snav-item" onclick="showPanel('invite')">🔗 Invite Code</button>
+      <button class="snav-item" onclick="showPanel('scoring')">📊 Scoring</button>
+      <button class="snav-item" onclick="showPanel('trade-deadline')">📅 Trade Deadline</button>
+      <div class="snav-section">My Team</div>
+      <button class="snav-item" onclick="showPanel('my-team')">🃏 Team Settings</button>
+      <div class="snav-section">Account</div>
+      <button class="snav-item" onclick="showPanel('account')">👤 Account</button>
+      <div class="snav-section" id="commNavSection" style="display:none">Commissioner</div>
+      <button class="snav-item" onclick="showPanel('manage-teams')" id="commBtn1" style="display:none">👥 Manage Teams<span class="commissioner-tag">COMM</span></button>
+      <button class="snav-item" onclick="showPanel('week-control')" id="commBtn2" style="display:none">📆 Week Control<span class="commissioner-tag">COMM</span></button>
+    </div>
+
+    <!-- ── PANELS ── -->
+    <div class="settings-body">
+
+      <!-- LEAGUE INFO -->
+      <div class="panel active" id="panel-league-info">
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <div class="section-title">LEAGUE INFO</div>
+              <div class="section-sub">Basic league details</div>
+            </div>
+            <span id="leagueInfoBadge" class="viewer-badge">VIEW ONLY</span>
+          </div>
+          <div class="section-body">
+            <div class="form-row">
+              <div class="form-label">League Name</div>
+              <input class="form-input" id="leagueName" disabled/>
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <div class="form-label">Sport</div>
+                <select class="form-select" id="leagueSport" disabled>
+                  <option value="NFL">NFL</option>
+                  <option value="MLB">MLB</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-label">Mode</div>
+                <select class="form-select" id="leagueMode" disabled>
+                  <option value="weekly">Weekly</option>
+                  <option value="daily">Daily</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-label">Max Teams</div>
+                <input class="form-input" id="leagueMaxTeams" type="number" min="2" max="20" disabled/>
+              </div>
+              <div class="form-row">
+                <div class="form-label">Season</div>
+                <input class="form-input" id="leagueSeason" disabled/>
+              </div>
+            </div>
+            <div class="btn-row" id="leagueInfoBtnRow" style="display:none">
+              <button class="btn-save" onclick="saveLeagueInfo()">SAVE CHANGES</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- read-only info block -->
+        <div class="section-card">
+          <div class="section-head"><div class="section-title">LEAGUE STATS</div></div>
+          <div class="section-body">
+            <div class="info-grid" id="leagueStatsGrid">
+              <div class="info-item"><div class="info-item-label">Teams Joined</div><div class="info-item-val" id="statTeams">—</div></div>
+              <div class="info-item"><div class="info-item-label">Current Week</div><div class="info-item-val" id="statWeek">—</div></div>
+              <div class="info-item"><div class="info-item-label">Commissioner</div><div class="info-item-val" id="statComm">—</div></div>
+              <div class="info-item"><div class="info-item-label">Created</div><div class="info-item-val" id="statCreated">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVITE CODE -->
+      <div class="panel" id="panel-invite">
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <div class="section-title">INVITE CODE</div>
+              <div class="section-sub">Share this code with friends to join your league</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="form-label">Your League's Invite Code</div>
+            <div class="invite-code-wrap" style="margin-bottom:16px">
+              <div class="invite-code-display" id="inviteCodeDisplay">——————</div>
+              <button class="btn-copy" id="btnCopy" onclick="copyInviteCode()">📋 COPY</button>
+            </div>
+            <div class="form-hint">Friends go to <strong>Join League</strong> and enter this code to join your league.</div>
+            <div style="margin-top:16px">
+              <a href="join-league.html" style="font-family:var(--font-mono);font-size:10px;color:var(--blue);text-decoration:none">→ Go to Join League page</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Commissioner: regenerate code -->
+        <div class="section-card" id="regenSection" style="display:none">
+          <div class="section-head">
+            <div><div class="section-title">REGENERATE CODE</div><div class="section-sub">Generate a new invite code — old code will stop working</div></div>
+            <span class="commissioner-badge">COMMISSIONER</span>
+          </div>
+          <div class="section-body">
+            <button class="btn-danger" onclick="regenerateCode()">🔄 GENERATE NEW CODE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCORING -->
+      <div class="panel" id="panel-scoring">
+        <div class="section-card">
+          <div class="section-head">
+            <div><div class="section-title">SCORING SETTINGS</div><div class="section-sub">How points are calculated</div></div>
+            <span id="scoringBadge" class="viewer-badge">VIEW ONLY</span>
+          </div>
+          <div class="section-body">
+            <div class="form-row">
+              <div class="form-label">NFL Scoring Format</div>
+              <select class="form-select" id="nflScoring" disabled>
+                <option value="standard">Standard</option>
+                <option value="half_ppr">Half PPR</option>
+                <option value="full_ppr">Full PPR</option>
+              </select>
+              <div class="form-hint">PPR = Points Per Reception. Half PPR = 0.5 pts/catch, Full PPR = 1 pt/catch.</div>
+            </div>
+            <div class="btn-row" id="scoringBtnRow" style="display:none">
+              <button class="btn-save" onclick="saveScoring()">SAVE SCORING</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRADE DEADLINE -->
+      <div class="panel" id="panel-trade-deadline">
+        <div class="section-card">
+          <div class="section-head">
+            <div><div class="section-title">TRADE DEADLINE</div><div class="section-sub">Set when trading is open and closed</div></div>
+            <span id="tradeBadge2" class="viewer-badge">VIEW ONLY</span>
+          </div>
+          <div class="section-body">
+            <div class="form-grid">
+              <div class="form-row">
+                <div class="form-label">Trading Opens</div>
+                <input type="datetime-local" class="form-input" id="tradeOpen" disabled/>
+                <div class="form-hint">Leave blank for always open</div>
+              </div>
+              <div class="form-row">
+                <div class="form-label">Trading Closes</div>
+                <input type="datetime-local" class="form-input" id="tradeClose" disabled/>
+                <div class="form-hint">Leave blank for no deadline</div>
+              </div>
+            </div>
+            <div id="tradeStatusDisplay" style="margin-top:12px;font-family:var(--font-mono);font-size:11px;color:var(--muted)"></div>
+            <div class="btn-row" id="tradeDeadlineBtnRow" style="display:none">
+              <button class="btn-save" onclick="saveTradeDeadline()">SAVE DEADLINE</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY TEAM -->
+      <div class="panel" id="panel-my-team">
+        <div class="section-card">
+          <div class="section-head">
+            <div><div class="section-title">MY TEAM</div><div class="section-sub">Your team settings in this league</div></div>
+          </div>
+          <div class="section-body">
+            <div class="form-row">
+              <div class="form-label">Team Name</div>
+              <input class="form-input" id="teamName" placeholder="Enter team name..."/>
+            </div>
+            <div class="form-row">
+              <div class="form-label">Coins</div>
+              <input class="form-input" id="teamCoins" disabled/>
+              <div class="form-hint">Coins are earned through gameplay and cannot be manually changed.</div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-save" onclick="saveTeamName()">SAVE TEAM NAME</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT -->
+      <div class="panel" id="panel-account">
+        <div class="section-card">
+          <div class="section-head">
+            <div><div class="section-title">ACCOUNT</div><div class="section-sub">Your DiamondUT account</div></div>
+          </div>
+          <div class="section-body">
+            <div class="form-row">
+              <div class="form-label">Email</div>
+              <input class="form-input" id="accountEmail" disabled/>
+            </div>
+            <div class="form-row">
+              <div class="form-label">User ID</div>
+              <input class="form-input" id="accountId" disabled style="font-family:var(--font-mono);font-size:11px"/>
+            </div>
+            <div class="btn-row">
+              <button class="btn-danger" onclick="signOut()">🚪 SIGN OUT</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGE TEAMS (commissioner) -->
+      <div class="panel" id="panel-manage-teams">
+        <div class="section-card">
+          <div class="section-head">
+            <div><div class="section-title">MANAGE TEAMS</div><div class="section-sub">View and remove teams from the league</div></div>
+            <span class="commissioner-badge">COMMISSIONER</span>
+          </div>
+          <div class="section-body">
+            <div id="teamListBody"><div style="color:var(--muted);font-family:var(--font-mono);font-size:11px">Loading teams...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEK CONTROL (commissioner) -->
+      <div class="panel" id="panel-week-control">
+        <div class="section-card">
+          <div class="section-head">
+            <div><div class="section-title">WEEK CONTROL</div><div class="section-sub">Advance or reset the current week</div></div>
+            <span class="commissioner-badge">COMMISSIONER</span>
+          </div>
+          <div class="section-body">
+            <div class="form-label">Current Week</div>
+            <div class="week-control">
+              <div class="week-display" id="weekDisplay">—</div>
+              <div class="week-btns">
+                <button class="week-btn" onclick="changeWeek(1)">▲ ADVANCE</button>
+                <button class="week-btn" onclick="changeWeek(-1)">▼ BACK</button>
+              </div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">of 18 weeks</div>
+            </div>
+            <div class="form-hint" style="margin-top:12px">Advancing the week triggers the weekly scoring cycle.</div>
+          </div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="danger-title">DANGER ZONE</div>
+          <div class="danger-sub">These actions cannot be undone. Commissioner only.</div>
+          <button class="btn-danger" onclick="confirmResetWeek()">🔄 RESET LEAGUE TO WEEK 1</button>
+        </div>
+      </div>
+
+    </div><!-- end settings-body -->
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase } from './supabase.js'
+
+let currentUser = null
+let currentTeam = null
+let currentLeague = null
+let isCommissioner = false
+let currentWeek = 1
+
+// ── INIT ──
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = 'login.html'; return }
+  currentUser = user
+
+  document.getElementById('accountEmail').value = user.email || ''
+  document.getElementById('accountId').value    = user.id || ''
+
+  const leagueId = localStorage.getItem('activeLeagueId')
+  const teamId   = localStorage.getItem('activeTeamId')
+  if (!leagueId || !teamId) return
+
+  const [{ data: team }, { data: league }] = await Promise.all([
+    supabase.from('teams').select('*').eq('id', teamId).single(),
+    supabase.from('leagues').select('*, teams(id,name,user_id,coins,wins,losses)').eq('id', leagueId).single()
+  ])
+  if (!team || !league) return
+  currentTeam  = team
+  currentLeague = league
+  currentWeek  = league.week_number || 1
+
+  const sport = league.sport || 'MLB'
+  document.getElementById('sportBadge').textContent     = sport
+  document.getElementById('sportSubLabel').textContent  = `${sport} · SEASON 2026`
+  document.getElementById('weekPill').textContent       = `WEEK ${currentWeek} OF 18`
+  document.getElementById('coinEl').textContent         = team.coins ?? 500
+  document.getElementById('avatarEl').textContent       = (team.name || 'T')[0].toUpperCase()
+  document.getElementById('weekDisplay').textContent    = currentWeek
+
+  // Trade badge
+  const { count } = await supabase.from('trades').select('id', { count: 'exact', head: true }).eq('receiver_team_id', teamId).eq('status', 'pending')
+  if (count > 0) { const b = document.getElementById('tradeBadge'); b.textContent = count; b.style.display = '' }
+
+  // Is commissioner?
+  isCommissioner = league.commissioner_id === currentUser.id || league.created_by === currentUser.id
+  if (isCommissioner) {
+    document.getElementById('commNavSection').style.display = ''
+    document.getElementById('commBtn1').style.display = ''
+    document.getElementById('commBtn2').style.display = ''
+    document.getElementById('regenSection').style.display = ''
+    // Enable editable fields
+    ;['leagueName','leagueSport','leagueMode','leagueMaxTeams','nflScoring','tradeOpen','tradeClose'].forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.disabled = false
+    })
+    document.getElementById('leagueInfoBadge').className = 'commissioner-badge'
+    document.getElementById('leagueInfoBadge').textContent = '👑 COMMISSIONER'
+    document.getElementById('scoringBadge').className = 'commissioner-badge'
+    document.getElementById('scoringBadge').textContent = '👑 COMMISSIONER'
+    document.getElementById('tradeBadge2').className = 'commissioner-badge'
+    document.getElementById('tradeBadge2').textContent = '👑 COMMISSIONER'
+    document.getElementById('leagueInfoBtnRow').style.display = 'flex'
+    document.getElementById('scoringBtnRow').style.display = 'flex'
+    document.getElementById('tradeDeadlineBtnRow').style.display = 'flex'
+  }
+
+  // Populate league info
+  document.getElementById('leagueName').value     = league.name || ''
+  document.getElementById('leagueSport').value    = league.sport || 'MLB'
+  document.getElementById('leagueMode').value     = league.mode || 'weekly'
+  document.getElementById('leagueMaxTeams').value = league.max_teams || 10
+  document.getElementById('leagueSeason').value   = league.season || 2026
+  document.getElementById('nflScoring').value     = league.nfl_scoring || 'half_ppr'
+
+  // Trade deadline
+  if (league.trade_open_at)  document.getElementById('tradeOpen').value  = new Date(league.trade_open_at).toISOString().slice(0,16)
+  if (league.trade_close_at) document.getElementById('tradeClose').value = new Date(league.trade_close_at).toISOString().slice(0,16)
+  updateTradeStatus()
+
+  // Invite code
+  document.getElementById('inviteCodeDisplay').textContent = league.invite_code || 'NOT SET'
+
+  // Stats
+  const teamCount = (league.teams || []).length
+  document.getElementById('statTeams').textContent   = `${teamCount} / ${league.max_teams || 10}`
+  document.getElementById('statWeek').textContent    = `Week ${currentWeek} of 18`
+  document.getElementById('statCreated').textContent = league.created_at ? new Date(league.created_at).toLocaleDateString() : '—'
+
+  // Commissioner name
+  const commTeam = (league.teams || []).find(t => t.user_id === league.commissioner_id)
+  document.getElementById('statComm').textContent = commTeam?.name || (isCommissioner ? 'You' : '—')
+
+  // My team
+  document.getElementById('teamName').value  = team.name || ''
+  document.getElementById('teamCoins').value = `${team.coins ?? 500} coins`
+
+  // Manage teams list
+  renderTeamList(league.teams || [])
+}
+
+function updateTradeStatus() {
+  const opens  = document.getElementById('tradeOpen').value
+  const closes = document.getElementById('tradeClose').value
+  const now    = new Date()
+  let msg = ''
+  if (!opens && !closes) msg = '✅ Trading is always open (no deadline set)'
+  else {
+    const o = opens  ? new Date(opens)  : null
+    const c = closes ? new Date(closes) : null
+    if (o && now < o) msg = `⏳ Trading opens ${o.toLocaleString()}`
+    else if (c && now > c) msg = `🔒 Trading closed since ${c.toLocaleString()}`
+    else msg = `✅ Trading is open${c ? ` · closes ${c.toLocaleString()}` : ''}`
+  }
+  document.getElementById('tradeStatusDisplay').textContent = msg
+}
+
+function renderTeamList(teams) {
+  const colors = [
+    'linear-gradient(135deg,#3B8BF5,#27C96A)',
+    'linear-gradient(135deg,#E8433B,#F5C518)',
+    'linear-gradient(135deg,#8B5CF6,#3B8BF5)',
+    'linear-gradient(135deg,#27C96A,#3B8BF5)',
+    'linear-gradient(135deg,#F5C518,#E8433B)',
+    'linear-gradient(135deg,#EC4899,#8B5CF6)',
+  ]
+  const el = document.getElementById('teamListBody')
+  if (!teams.length) { el.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px">No teams in this league.</div>'; return }
+  el.innerHTML = teams.map((t, i) => {
+    const isMe    = t.user_id === currentUser.id
+    const isComm  = t.user_id === currentLeague.commissioner_id
+    return `<div class="team-list-item">
+      <div class="team-avatar-sm" style="background:${colors[i%colors.length]}">${(t.name||'T')[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="team-list-name">${t.name || 'Team'} ${isMe ? '<span class="you-tag">YOU</span>' : ''} ${isComm ? '<span class="commissioner-crown">👑</span>' : ''}</div>
+        <div class="team-list-meta">${t.wins||0}W · ${t.losses||0}L · ${t.coins||0} coins</div>
+      </div>
+      ${isCommissioner && !isMe && !isComm ? `<button class="btn-danger" style="padding:6px 12px;font-size:9px" onclick="removeTeam('${t.id}','${t.name}')">REMOVE</button>` : ''}
+    </div>`
+  }).join('')
+}
+
+// ── SAVE FUNCTIONS ──
+window.saveLeagueInfo = async function() {
+  const { error } = await supabase.from('leagues').update({
+    name:      document.getElementById('leagueName').value.trim(),
+    sport:     document.getElementById('leagueSport').value,
+    mode:      document.getElementById('leagueMode').value,
+    max_teams: parseInt(document.getElementById('leagueMaxTeams').value),
+  }).eq('id', currentLeague.id)
+  if (error) { showToast('Failed to save.', 'error'); return }
+  showToast('League info saved!', 'success')
+}
+
+window.saveScoring = async function() {
+  const { error } = await supabase.from('leagues').update({
+    nfl_scoring: document.getElementById('nflScoring').value
+  }).eq('id', currentLeague.id)
+  if (error) { showToast('Failed to save.', 'error'); return }
+  showToast('Scoring settings saved!', 'success')
+}
+
+window.saveTradeDeadline = async function() {
+  const opens  = document.getElementById('tradeOpen').value
+  const closes = document.getElementById('tradeClose').value
+  const { error } = await supabase.from('leagues').update({
+    trade_open_at:  opens  ? new Date(opens).toISOString()  : null,
+    trade_close_at: closes ? new Date(closes).toISOString() : null
+  }).eq('id', currentLeague.id)
+  if (error) { showToast('Failed to save.', 'error'); return }
+  updateTradeStatus()
+  showToast('Trade deadline saved!', 'success')
+}
+
+window.saveTeamName = async function() {
+  const name = document.getElementById('teamName').value.trim()
+  if (!name) { showToast('Team name cannot be empty.', 'error'); return }
+  const { error } = await supabase.from('teams').update({ name }).eq('id', currentTeam.id)
+  if (error) { showToast('Failed to save.', 'error'); return }
+  showToast('Team name updated!', 'success')
+  document.getElementById('avatarEl').textContent = name[0].toUpperCase()
+}
+
+window.copyInviteCode = function() {
+  const code = document.getElementById('inviteCodeDisplay').textContent
+  if (!code || code === 'NOT SET') { showToast('No invite code set.', 'error'); return }
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('btnCopy')
+    btn.textContent = '✓ COPIED!'
+    btn.classList.add('copied')
+    setTimeout(() => { btn.textContent = '📋 COPY'; btn.classList.remove('copied') }, 2000)
+  })
+}
+
+window.regenerateCode = async function() {
+  if (!confirm('Generate a new invite code? The old code will stop working.')) return
+  const newCode = (currentLeague.name||'LEAGUE').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6) + '-' + Math.random().toString(36).toUpperCase().slice(2,6)
+  const { error } = await supabase.from('leagues').update({ invite_code: newCode }).eq('id', currentLeague.id)
+  if (error) { showToast('Failed to regenerate.', 'error'); return }
+  document.getElementById('inviteCodeDisplay').textContent = newCode
+  currentLeague.invite_code = newCode
+  showToast('New invite code generated!', 'success')
+}
+
+window.changeWeek = async function(delta) {
+  const newWeek = Math.max(1, Math.min(18, currentWeek + delta))
+  if (newWeek === currentWeek) return
+  const { error } = await supabase.from('leagues').update({ week_number: newWeek }).eq('id', currentLeague.id)
+  if (error) { showToast('Failed to update week.', 'error'); return }
+  currentWeek = newWeek
+  document.getElementById('weekDisplay').textContent = newWeek
+  document.getElementById('weekPill').textContent    = `WEEK ${newWeek} OF 18`
+  showToast(`Week updated to ${newWeek}!`, 'success')
+}
+
+window.confirmResetWeek = function() {
+  if (!confirm('Reset league to Week 1? This cannot be undone.')) return
+  changeWeek(1 - currentWeek)
+}
+
+window.removeTeam = async function(teamId, teamName) {
+  if (!confirm(`Remove ${teamName} from the league? This cannot be undone.`)) return
+  const { error } = await supabase.from('rosters').delete().eq('team_id', teamId)
+  const { error: e2 } = await supabase.from('teams').delete().eq('id', teamId)
+  if (error || e2) { showToast('Failed to remove team.', 'error'); return }
+  showToast(`${teamName} removed from league.`, 'success')
+  // Reload teams list
+  const { data: league } = await supabase.from('leagues').select('*, teams(id,name,user_id,coins,wins,losses)').eq('id', currentLeague.id).single()
+  if (league) renderTeamList(league.teams || [])
+}
+
+window.signOut = async function() {
+  await supabase.auth.signOut()
+  localStorage.clear()
+  window.location.href = 'login.html'
+}
+
+// ── PANEL SWITCHER ──
+window.showPanel = function(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'))
+  document.getElementById('panel-' + id).classList.add('active')
+  event.target.classList.add('active')
+  // Load teams panel on demand
+  if (id === 'manage-teams') renderTeamList(currentLeague?.teams || [])
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = `toast ${type} show`
+  setTimeout(() => t.className = 'toast', 3000)
+}
+
+// Live update trade status when inputs change
+document.getElementById('tradeOpen').addEventListener('change', updateTradeStatus)
+document.getElementById('tradeClose').addEventListener('change', updateTradeStatus)
+
+init()
+</script>
+</body>
+</html>
