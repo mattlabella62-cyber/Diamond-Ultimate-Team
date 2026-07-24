@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiamondUT — Fantasy Sports, Reimagined</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --gold: #F5C518;
+  --gold2: #FFE066;
+  --red: #E8433B;
+  --green: #27C96A;
+  --blue: #3B8BF5;
+  --platinum-c: #c4b5fd;
+  --bronze-c: #f0a070;
+  --silver-c: #c0d8f0;
+  --bg: #060810;
+  --surface: #0F1218;
+  --surface2: #151B25;
+  --surface3: #1C2333;
+  --border: #1E2535;
+  --border2: #283044;
+  --text: #E8ECF4;
+  --muted: #5A6A82;
+  --muted2: #3A4558;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--font-body);
+  min-height: 100vh; overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 15% 0%, rgba(245,197,24,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 100%, rgba(59,139,245,0.05) 0%, transparent 50%);
+}
+a { color: inherit; text-decoration: none; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 500; height: 72px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; background: rgba(6,8,16,0.85); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.logo-wrap { display: flex; align-items: center; gap: 12px; }
+.logo-diamond { width: 34px; height: 34px; background: linear-gradient(135deg, var(--gold), #FF8C00); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.logo-name { font-family: var(--font-display); font-size: 24px; letter-spacing: 3px; color: var(--gold); }
+
+.auth-actions { display: flex; align-items: center; gap: 12px; }
+.btn-login {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  color: var(--text); padding: 10px 18px; border-radius: 8px; transition: all 0.15s;
+}
+.btn-login:hover { background: var(--surface2); }
+.btn-signup {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  background: var(--gold); color: #000; padding: 10px 22px; border-radius: 8px; transition: opacity 0.15s;
+}
+.btn-signup:hover { opacity: 0.85; }
+
+.user-menu { position: relative; display: none; }
+.user-menu.visible { display: block; }
+.user-avatar-btn {
+  display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 99px; padding: 6px 14px 6px 6px; cursor: pointer; transition: all 0.15s;
+}
+.user-avatar-btn:hover { border-color: var(--gold); }
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(245,197,24,0.15); color: var(--gold);
+  display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+}
+.user-caret { font-size: 9px; color: var(--muted); transition: transform 0.15s; }
+.user-menu.open .user-caret { transform: rotate(180deg); }
+.user-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0; width: 280px;
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; display: none;
+}
+.user-menu.open .user-dropdown { display: block; }
+.dropdown-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 12px 16px 6px; }
+.team-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; transition: background 0.15s;
+}
+.team-row:hover { background: var(--surface2); }
+.team-row-sport {
+  font-family: var(--font-mono); font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+  background: var(--surface3); color: var(--muted);
+}
+.team-row-info { flex: 1; min-width: 0; }
+.team-row-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-row-league { font-family: var(--font-mono); font-size: 10px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown-divider { height: 1px; background: var(--border); margin: 6px 0; }
+.dropdown-link {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+  color: var(--text); cursor: pointer; transition: background 0.15s;
+}
+.dropdown-link:hover { background: var(--surface2); }
+.dropdown-link.gold { color: var(--gold); }
+.dropdown-link.danger { color: var(--red); }
+.dropdown-empty { padding: 14px 16px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+.hero {
+  display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 40px;
+  max-width: 1200px; margin: 0 auto; padding: 90px 40px 100px;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+}
+.hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--gold); }
+.hero-title {
+  font-family: var(--font-display); font-size: 64px; line-height: 0.95; letter-spacing: 1px; color: var(--text);
+  margin-bottom: 22px;
+}
+.hero-title span { color: var(--gold); }
+.hero-sub { font-size: 17px; color: var(--muted); line-height: 1.6; max-width: 460px; margin-bottom: 34px; }
+.hero-ctas { display: flex; gap: 14px; margin-bottom: 40px; }
+.btn-hero-primary {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  background: var(--gold); color: #000; padding: 16px 30px; border-radius: 10px; transition: all 0.15s;
+  box-shadow: 0 8px 24px rgba(245,197,24,0.25);
+}
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(245,197,24,0.35); }
+.btn-hero-secondary {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  border: 1px solid var(--border2); color: var(--text); padding: 16px 30px; border-radius: 10px; transition: all 0.15s;
+}
+.btn-hero-secondary:hover { border-color: var(--gold); color: var(--gold); }
+.hero-stats { display: flex; gap: 32px; }
+.hero-stat-num { font-family: var(--font-display); font-size: 28px; color: var(--gold); }
+.hero-stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+.card-fan { position: relative; height: 380px; display: flex; align-items: center; justify-content: center; }
+.fan-card {
+  position: absolute; width: 150px; height: 210px; border-radius: 12px;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5); transition: transform 0.4s ease;
+}
+.fan-card:hover { transform: translateY(-18px) scale(1.04) !important; z-index: 50 !important; }
+.fan-card-1 { background: linear-gradient(160deg,#3d2400,#1a0f00); border: 1px solid rgba(245,197,24,0.4); transform: rotate(-14deg) translateX(-90px); z-index: 1; }
+.fan-card-2 { background: linear-gradient(160deg,#1c2a3d,#0d1420); border: 1px solid rgba(59,139,245,0.35); transform: rotate(-5deg) translateX(-35px) translateY(10px); z-index: 2; }
+.fan-card-3 { background: linear-gradient(160deg,#1a1200,#0d0f14); border: 1px solid rgba(255,215,0,0.6); transform: rotate(6deg) translateX(35px) translateY(6px); z-index: 3; box-shadow: 0 0 40px rgba(255,215,0,0.25), 0 20px 50px rgba(0,0,0,0.5); }
+.fan-card-4 { background: linear-gradient(160deg,#3d1a00,#1c0d00); border: 1px solid rgba(232,120,20,0.4); transform: rotate(15deg) translateX(90px) translateY(14px); z-index: 1; }
+.fan-card-tier {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 800; letter-spacing: 1px; padding: 6px 10px;
+  color: var(--gold);
+}
+.fan-card-art { flex: 1; display: flex; align-items: center; justify-content: center; }
+.fan-card-art svg { width: 60%; opacity: 0.9; filter: drop-shadow(0 0 10px rgba(255,255,255,0.15)); }
+.fan-card-name { font-family: var(--font-display); font-size: 14px; letter-spacing: 1px; text-align: center; padding-bottom: 10px; color: var(--text); }
+
+.section { max-width: 1200px; margin: 0 auto; padding: 70px 40px; }
+.section-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 12px; text-align: center;
+}
+.section-heading { font-family: var(--font-display); font-size: 40px; letter-spacing: 1px; text-align: center; margin-bottom: 50px; }
+.section-heading span { color: var(--gold); }
+
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px 22px; position: relative; }
+.step-num { font-family: var(--font-display); font-size: 46px; color: var(--surface3); line-height: 1; margin-bottom: 14px; }
+.step-title { font-family: var(--font-display); font-size: 19px; letter-spacing: 1px; margin-bottom: 8px; }
+.step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; transition: all 0.2s; }
+.feature-card:hover { border-color: rgba(245,197,24,0.3); transform: translateY(-3px); }
+.feature-icon { font-size: 30px; margin-bottom: 16px; }
+.feature-title { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; margin-bottom: 8px; }
+.feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.sport-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 36px; }
+.sport-tab {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  padding: 10px 24px; border-radius: 99px; border: 1px solid var(--border2); color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.sport-tab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+.sport-panel { display: none; text-align: center; max-width: 640px; margin: 0 auto; }
+.sport-panel.active { display: block; }
+.sport-panel-title { font-family: var(--font-display); font-size: 30px; letter-spacing: 1px; margin-bottom: 12px; }
+.sport-panel-desc { color: var(--muted); font-size: 15px; line-height: 1.7; }
+
+.final-cta {
+  text-align: center; padding: 90px 40px; background: linear-gradient(180deg, transparent, rgba(245,197,24,0.04));
+  border-top: 1px solid var(--border);
+}
+.final-cta-title { font-family: var(--font-display); font-size: 42px; letter-spacing: 1px; margin-bottom: 16px; }
+.final-cta-title span { color: var(--gold); }
+.final-cta-sub { color: var(--muted); font-size: 15px; margin-bottom: 34px; }
+
+.footer { border-top: 1px solid var(--border); padding: 30px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-logo { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.footer-links { display: flex; gap: 24px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.footer-links a:hover { color: var(--gold); }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; padding-top: 50px; }
+  .hero-title { font-size: 44px; }
+  .card-fan { height: 260px; }
+  .fan-card { width: 110px; height: 154px; }
+  .steps-grid, .feature-grid { grid-template-columns: 1fr; }
+  .topbar { padding: 0 20px; }
+  .section { padding: 50px 20px; }
+}
+
+@media (max-width: 480px) {
+  .logo-name { font-size: 19px; letter-spacing: 2px; }
+  .btn-login { padding: 8px 12px; font-size: 11px; }
+  .btn-signup { padding: 8px 14px; font-size: 11px; }
+  .hero { padding: 40px 16px 60px; gap: 24px; }
+  .hero-title { font-size: 32px; }
+  .hero-sub { font-size: 14px; }
+  .hero-ctas { flex-direction: column; }
+  .btn-hero-primary, .btn-hero-secondary { text-align: center; padding: 14px 20px; }
+  .hero-stats { gap: 16px; flex-wrap: wrap; }
+  .hero-stat-num { font-size: 22px; }
+  .hero-stat-label { font-size: 8px; }
+  .card-fan { height: 200px; }
+  .fan-card { width: 84px; height: 118px; }
+  .fan-card-1 { transform: rotate(-14deg) translateX(-58px); }
+  .fan-card-2 { transform: rotate(-5deg) translateX(-22px) translateY(8px); }
+  .fan-card-3 { transform: rotate(6deg) translateX(22px) translateY(5px); }
+  .fan-card-4 { transform: rotate(15deg) translateX(58px) translateY(10px); }
+  .fan-card-tier { font-size: 7px; padding: 4px 6px; }
+  .fan-card-name { font-size: 10px; padding-bottom: 6px; }
+  .section-heading { font-size: 28px; }
+  .final-cta-title { font-size: 30px; }
+  .final-cta { padding: 60px 20px; }
+  .user-dropdown { width: 240px; }
+  .footer { flex-direction: column; gap: 14px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-diamond"></div>
+    <div class="logo-name">DIAMONDUT</div>
+  </div>
+
+  <div class="auth-actions" id="loggedOutActions">
+    <a class="btn-login" href="login.html">Log In</a>
+    <a class="btn-signup" href="login.html?tab=signup">Sign Up Free</a>
+  </div>
+
+  <div class="user-menu" id="userMenu">
+    <button class="user-avatar-btn" onclick="toggleUserMenu()">
+      <div class="user-avatar" id="userAvatarInitial">?</div>
+      <span class="user-caret">▾</span>
+    </button>
+    <div class="user-dropdown">
+      <div class="dropdown-label">My Teams</div>
+      <div id="teamsList"><div class="dropdown-empty">Loading…</div></div>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-link gold" href="create-league.html">➕ Create a League</a>
+      <a class="dropdown-link" href="join-league.html">🔑 Join a League</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-link" href="settings.html">⚙️ Settings</a>
+      <div class="dropdown-link danger" onclick="logOut()">🚪 Log Out</div>
+    </div>
+  </div>
+</div>
+
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">Season Long · NFL &amp; MLB</div>
+    <h1 class="hero-title">Fantasy sports,<br>built on <span>packs</span>,<br>not drafts.</h1>
+    <p class="hero-sub">Open weekly card packs, build your roster, chase a randomly-drawn Legendary player, and battle your league head-to-head all season. No draft day required.</p>
+    <div class="hero-ctas">
+      <a class="btn-hero-primary" href="create-league.html">Create a League →</a>
+      <a class="btn-hero-secondary" href="join-league.html">Join with a Code</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">2</div><div class="hero-stat-label">Sports Supported</div></div>
+      <div><div class="hero-stat-num">17</div><div class="hero-stat-label">Cards Per Pack</div></div>
+      <div><div class="hero-stat-num">6-12</div><div class="hero-stat-label">Teams Per League</div></div>
+    </div>
+  </div>
+
+  <div class="card-fan">
+    <div class="fan-card fan-card-1">
+      <div class="fan-card-tier">BRONZE</div>
+      <div class="fan-card-art"><svg viewBox="0 0 24 24" fill="white"><path d="M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/></svg></div>
+      <div class="fan-card-name">ROOKIE WR</div>
+    </div>
+    <div class="fan-card fan-card-2">
+      <div class="fan-card-tier" style="color:var(--silver-c)">SILVER</div>
+      <div class="fan-card-art"><svg viewBox="0 0 24 24" fill="white"><path d="M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/></svg></div>
+      <div class="fan-card-name">ALL-STAR SS</div>
+    </div>
+    <div class="fan-card fan-card-3">
+      <div class="fan-card-tier">👑 LEGENDARY</div>
+      <div class="fan-card-art"><svg viewBox="0 0 24 24" fill="white"><path d="M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/></svg></div>
+      <div class="fan-card-name">MVP QB</div>
+    </div>
+    <div class="fan-card fan-card-4">
+      <div class="fan-card-tier" style="color:var(--bronze-c)">BRONZE</div>
+      <div class="fan-card-art"><svg viewBox="0 0 24 24" fill="white"><path d="M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/></svg></div>
+      <div class="fan-card-name">UTIL 1B</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-eyebrow">The Season, Step by Step</div>
+  <h2 class="section-heading">From <span>pack</span> to <span>championship</span></h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-title">Open Your Pack</div>
+      <div class="step-desc">Every week, crack open a fresh pack of Bronze, Silver, Gold, and Platinum players — no draft, no waiting your turn.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-title">Build Your Roster</div>
+      <div class="step-desc">Set your lineup, work the Trade Center, and pay coins to keep your best players across the weekly reset.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-title">Chase the Legendary</div>
+      <div class="step-desc">One randomly-drawn Legendary card is up for grabs each week — sacrifice enough roster value to claim it.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-title">Battle for the Trophy</div>
+      <div class="step-desc">Head-to-head matchups all season long, standings that update in real time, and a championship on the line.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-eyebrow">Built for Real Leagues</div>
+  <h2 class="section-heading">Everything a <span>commissioner</span> needs</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <div class="feature-title">Trade Center</div>
+      <div class="feature-desc">Propose, review, and veto trades with a live activity feed so nobody misses a deal.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏆</div>
+      <div class="feature-title">League History</div>
+      <div class="feature-desc">A trophy cabinet that tracks every champion — and a Toilet Bowl award for whoever finishes last.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚙️</div>
+      <div class="feature-title">Full Commissioner Control</div>
+      <div class="feature-desc">Adjust scoring, season length, trade deadlines, and renew your league for a new season anytime.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏥</div>
+      <div class="feature-title">Injury Pool</div>
+      <div class="feature-desc">Drop an injured player and claim a healthy replacement without waiting on a waiver wire.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏷️</div>
+      <div class="feature-title">Auction House</div>
+      <div class="feature-desc">Bid your weekly coins on a fresh pool of free agents alongside your league mates.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚔️</div>
+      <div class="feature-title">Yahoo-Style Matchups</div>
+      <div class="feature-desc">Browse every matchup in your league at once, or drill into your own head-to-head in detail.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-eyebrow">Pick Your Sport</div>
+  <h2 class="section-heading">Two sports. <span>One format.</span></h2>
+  <div class="sport-tabs">
+    <div class="sport-tab active" onclick="showSport('nfl', this)">🏈 NFL</div>
+    <div class="sport-tab" onclick="showSport('mlb', this)">⚾ MLB</div>
+  </div>
+  <div class="sport-panel active" id="panel-nfl">
+    <div class="sport-panel-title">18-Week Seasons</div>
+    <div class="sport-panel-desc">Matches the real NFL calendar — packs, trades, and a Legendary QB, RB, WR, TE, or K up for grabs every single week of the season.</div>
+  </div>
+  <div class="sport-panel" id="panel-mlb">
+    <div class="sport-panel-title">26-Week Seasons</div>
+    <div class="sport-panel-desc">Built for baseball's longer grind — the same weekly pack-and-trade format stretched across a full 26-week MLB season.</div>
+  </div>
+</div>
+
+<div class="final-cta">
+  <h2 class="final-cta-title">Your league is <span>one pack</span> away.</h2>
+  <p class="final-cta-sub">Free to create. Invite your friends in seconds.</p>
+  <div class="hero-ctas" style="justify-content:center">
+    <a class="btn-hero-primary" href="create-league.html">Create a League →</a>
+    <a class="btn-hero-secondary" href="join-league.html">Join with a Code</a>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-logo"><div class="logo-diamond" style="width:16px;height:16px"></div> DiamondUT · Season 2026</div>
+  <div class="footer-links">
+    <a href="create-league.html">Create League</a>
+    <a href="join-league.html">Join League</a>
+    <a href="login.html">Log In</a>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from './supabase.js'
+
+window.showSport = function(sport, el) {
+  document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'))
+  document.querySelectorAll('.sport-panel').forEach(p => p.classList.remove('active'))
+  el.classList.add('active')
+  document.getElementById('panel-' + sport).classList.add('active')
+}
+
+window.toggleUserMenu = function() {
+  document.getElementById('userMenu').classList.toggle('open')
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('userMenu')
+  if (menu.classList.contains('open') && !menu.contains(e.target)) menu.classList.remove('open')
+})
+
+window.logOut = async function() {
+  await supabase.auth.signOut()
+  window.location.reload()
+}
+
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  document.getElementById('loggedOutActions').style.display = 'none'
+  document.getElementById('userMenu').classList.add('visible')
+  document.getElementById('userAvatarInitial').textContent = (user.email || '?')[0].toUpperCase()
+
+  const { data: teams } = await supabase
+    .from('teams')
+    .select('id, team_name, league_id, leagues(id, name, sport)')
+    .eq('user_id', user.id)
+
+  const listEl = document.getElementById('teamsList')
+  if (!teams || teams.length === 0) {
+    listEl.innerHTML = `<div class="dropdown-empty">No teams yet — create or join a league below.</div>`
+    return
+  }
+
+  listEl.innerHTML = teams.map(t => `
+    <div class="team-row" onclick="goToTeam('${t.league_id}', '${t.id}', '${t.leagues?.sport || 'MLB'}')">
+      <span class="team-row-sport">${t.leagues?.sport || 'MLB'}</span>
+      <div class="team-row-info">
+        <div class="team-row-name">${t.team_name}</div>
+        <div class="team-row-league">${t.leagues?.name || 'League'}</div>
+      </div>
+    </div>
+  `).join('')
+}
+
+window.goToTeam = function(leagueId, teamId, sport) {
+  sessionStorage.setItem('activeLeagueId', leagueId)
+  sessionStorage.setItem('activeTeamId', teamId)
+  sessionStorage.setItem('activeSport', sport)
+  window.location.href = 'dashboard.html'
+}
+
+init()
+</script>
+</body>
+</html>
