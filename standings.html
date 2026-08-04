@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiamondUT — Standings</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --gold: #F5C518;
+  --gold2: #FFE066;
+  --gold-glow: rgba(245,197,24,0.3);
+  --red: #E8433B;
+  --green: #27C96A;
+  --blue: #3B8BF5;
+  --platinum-c: #c4b5fd;
+  --bronze-c: #f0a070;
+  --silver-c: #c0d8f0;
+  --bg: #060810;
+  --bg2: #0A0D14;
+  --surface: #0F1218;
+  --surface2: #151B25;
+  --surface3: #1C2333;
+  --border: #1E2535;
+  --border2: #283044;
+  --text: #E8ECF4;
+  --muted: #5A6A82;
+  --muted2: #3A4558;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(245,197,24,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(59,139,245,0.04) 0%, transparent 50%);
+}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 230px; height: 100vh; overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; z-index: 200;
+}
+.logo {
+  padding: 22px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-diamond {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold), #FF8C00);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.logo-text { line-height: 1; }
+.logo-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; color: var(--gold); }
+.logo-sub { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+.nav { padding: 14px 12px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.nav-section { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted2); padding: 10px 8px 5px; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(245,197,24,0.1); color: var(--gold); border: 1px solid rgba(245,197,24,0.2); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; background: var(--gold); border-radius: 0 2px 2px 0;
+}
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; font-family: var(--font-mono); font-size: 9px; background: var(--red); color: white; padding: 2px 6px; border-radius: 99px; font-weight: 700; }
+.coin-widget {
+  margin: 12px;
+  background: linear-gradient(135deg, rgba(245,197,24,0.08), rgba(245,197,24,0.03));
+  border: 1px solid rgba(245,197,24,0.2); border-radius: 10px; padding: 14px;
+}
+.coin-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.coin-amount { font-family: var(--font-display); font-size: 34px; color: var(--gold); line-height: 1.1; margin-top: 2px; }
+.coin-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.coin-track { height: 4px; background: var(--border2); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.coin-fill { height: 100%; width: 68%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 99px; }
+
+/* ═══ MAIN ═══ */
+.main { margin-left: 230px; flex: 1; display: flex; flex-direction: column; }
+.topbar {
+  height: 58px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 28px; gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-title { font-family: var(--font-display); font-size: 22px; letter-spacing: 3px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.week-pill { font-family: var(--font-mono); font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border2); padding: 5px 12px; border-radius: 99px; }
+
+/* ═══ CONTENT ═══ */
+.content { padding: 24px 28px 60px; display: flex; flex-direction: column; gap: 22px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-family: var(--font-display); font-size: 18px; letter-spacing: 2px; color: var(--text); }
+.section-action { font-family: var(--font-mono); font-size: 10px; color: var(--gold); border: 1px solid rgba(245,197,24,0.3); padding: 5px 12px; border-radius: 5px; cursor: pointer; text-decoration: none; transition: all 0.15s; background: none; }
+.section-action:hover { background: rgba(245,197,24,0.1); }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--border); }
+.panel-title { font-family: var(--font-display); font-size: 16px; letter-spacing: 2px; }
+
+/* ═══ STANDINGS TABLE ═══ */
+.standings-table { width: 100%; border-collapse: collapse; }
+.standings-table th {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px; color: var(--muted);
+  text-transform: uppercase; text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.standings-table th.num, .standings-table td.num { text-align: right; }
+.standings-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.standings-table tr:last-child td { border-bottom: none; }
+.standings-table tr:hover td { background: var(--surface2); }
+.standings-table tr.me td { background: rgba(245,197,24,0.05); }
+.standings-table tr.me td:first-child { border-left: 2px solid var(--gold); }
+.st-rank { font-family: var(--font-display); font-size: 18px; color: var(--muted2); width: 30px; }
+.st-rank.gold-rank { color: var(--gold); }
+.st-team { font-weight: 600; display: flex; align-items: center; }
+.st-avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;
+  background: var(--surface3); color: var(--muted); font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+tr.me .st-avatar { background: rgba(245,197,24,0.15); color: var(--gold); }
+.st-pct { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+.st-gb { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.st-team-you { color: var(--gold); font-size: 10px; font-family: var(--font-mono); margin-left: 6px; }
+.st-record { font-family: var(--font-mono); font-size: 12px; }
+.st-pts { font-family: var(--font-mono); font-weight: 700; color: var(--green); }
+.st-pts-against { font-family: var(--font-mono); color: var(--muted); }
+.st-streak { font-family: var(--font-mono); font-size: 11px; padding: 3px 8px; border-radius: 5px; }
+.st-streak.win { background: rgba(39,201,106,0.12); color: var(--green); }
+.st-streak.loss { background: rgba(232,67,59,0.12); color: var(--red); }
+.st-streak.none { color: var(--muted); }
+
+/* ═══ MATCHUPS ═══ */
+.matchup-row {
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.matchup-row:last-child { border-bottom: none; }
+.matchup-team { flex: 1; display: flex; align-items: center; gap: 8px; }
+.matchup-team.right { justify-content: flex-end; }
+.matchup-name { font-size: 13px; font-weight: 600; }
+.matchup-name.me { color: var(--gold); }
+.matchup-score { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--text); min-width: 34px; text-align: center; }
+.matchup-score.zero { color: var(--muted); font-weight: 400; }
+.matchup-vs { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); padding: 0 4px; }
+.matchup-status {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 99px; white-space: nowrap;
+}
+.matchup-status.scheduled { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+.matchup-status.final { background: rgba(39,201,106,0.12); color: var(--green); }
+.matchup-status.in_progress { background: rgba(245,197,24,0.12); color: var(--gold); }
+
+.empty-state {
+  padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px;
+}
+.empty-state button {
+  margin-top: 14px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  background: rgba(245,197,24,0.12); border: 1px solid var(--gold); color: var(--gold);
+}
+.empty-state button:hover { background: rgba(245,197,24,0.25); }
+.empty-state button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ═══ MOBILE NAV ═══ */
+.hamburger-btn {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; margin-right: 6px; flex-shrink: 0;
+}
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190;
+}
+@media (max-width: 900px) {
+  .hamburger-btn { display: block; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop.visible { display: block; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 20px 16px; }
+  .topbar { padding: 0 14px; gap: 8px; flex-wrap: wrap; height: auto; min-height: 58px; padding-top: 8px; padding-bottom: 8px; }
+  .topbar-title { max-width: 140px; font-size: 18px; }
+}
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.standings-table th.sticky-col, .standings-table td.sticky-col {
+  position: sticky; z-index: 2; background: var(--surface);
+}
+.sticky-1 { left: 0; width: 44px; }
+.sticky-2 { left: 44px; }
+.standings-table tr:hover td.sticky-col { background: var(--surface2); }
+.standings-table tr.me td.sticky-col { background: #131722; } /* opaque stand-in for the row's subtle gold tint, since sticky cells need a solid background */
+
+@media (max-width: 480px) {
+  .content { padding: 16px 10px; }
+  .standings-table { min-width: 560px; }
+  .standings-table th, .standings-table td { padding: 9px 10px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-diamond">⬦</div>
+    <div class="logo-text">
+      <div class="logo-name">DiamondUT</div>
+      <div class="logo-sub" id="sidebarSportSub">MLB · SEASON 2026</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+    <a class="nav-item" href="roster.html"><span class="nav-icon">🃏</span> My Roster</a>
+    <a class="nav-item" href="auction.html"><span class="nav-icon">🏷️</span> Auction House</a>
+    <a class="nav-item" href="legendary.html"><span class="nav-icon">👑</span> Legendary</a>
+    <div class="nav-section">League</div>
+    <a class="nav-item active" href="standings.html"><span class="nav-icon">🏆</span> Standings</a>
+    <a class="nav-item" href="matchup.html"><span class="nav-icon">⚔️</span> Matchup</a>
+    <a class="nav-item" href="history.html"><span class="nav-icon">📜</span> League History</a>
+    <a class="nav-item" href="trade.html"><span class="nav-icon">🔄</span> Trade Center<span class="nav-badge" id="tradeBadge" style="display:none">0</span></a>
+    <a class="nav-item" href="injury.html"><span class="nav-icon">🏥</span> Injury Pool</a>
+    <a class="nav-item" href="pack.html"><span class="nav-icon">📦</span> Open Pack<span class="nav-badge" id="packBadge" style="display:none">NEW</span></a>
+    <div class="nav-section">Account</div>
+    <a class="nav-item" href="#"><span class="nav-icon">🎨</span> Cosmetics</a>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="coin-widget">
+    <div class="coin-label">Coin Balance</div>
+    <div class="coin-amount" id="coinAmount">500</div>
+    <div class="coin-sub" id="coinSub">500 coins this week</div>
+    <div class="coin-track"><div class="coin-fill" id="coinFill" style="width:100%"></div></div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileNav()"></div>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <button class="hamburger-btn" onclick="toggleMobileNav()">☰</button>
+    <div class="topbar-title">Standings</div>
+    <div class="week-pill" id="weekPill">WEEK 1 OF 18</div>
+  </div>
+
+  <div class="content">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">League Standings</div>
+      </div>
+      <div id="standingsBody">
+        <div class="empty-state">Loading standings…</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script type="module">
+import { supabase } from './supabase.js'
+
+window.toggleMobileNav = function() {
+  document.querySelector('.sidebar').classList.toggle('open')
+  document.getElementById('sidebarBackdrop')?.classList.toggle('visible')
+}
+
+
+let leagueId, teamId, sport, leagueWeek, effectiveSeasonWeeks
+
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = 'login.html'; return }
+
+  leagueId = sessionStorage.getItem('activeLeagueId')
+  teamId   = sessionStorage.getItem('activeTeamId')
+  sport    = sessionStorage.getItem('activeSport') || 'MLB'
+  if (!leagueId || !teamId) { window.location.href = 'dashboard.html'; return }
+
+  document.getElementById('sidebarSportSub').textContent = `${sport} · SEASON 2026`
+
+  const { data: leagueRow } = await supabase.from('leagues').select('week_number, season_weeks').eq('id', leagueId).single()
+  leagueWeek = leagueRow?.week_number || 1
+  effectiveSeasonWeeks = leagueRow?.season_weeks || (sport === 'MLB' ? 26 : 18)
+  document.getElementById('weekPill').textContent = `WEEK ${leagueWeek} OF ${effectiveSeasonWeeks}`
+
+  const { data: teamRow } = await supabase.from('teams').select('coins').eq('id', teamId).single()
+  const coins = teamRow?.coins ?? 0
+  document.getElementById('coinAmount').textContent = coins
+  document.getElementById('coinSub').textContent = `${coins} coins this week`
+  document.getElementById('coinFill').style.width = Math.min((coins / 500) * 100, 100) + '%'
+
+  await loadStandings()
+  loadTradeBadge()
+  loadPackBadge()
+}
+
+async function loadStandings(isRetry = false) {
+  const [{ data: teams }, { data: matchups }] = await Promise.all([
+    supabase.from('teams').select('id, team_name').eq('league_id', leagueId),
+    supabase.from('matchups').select('team_a_id, team_b_id, team_a_score, team_b_score, winner_team_id, status, week_number')
+      .eq('league_id', leagueId).order('week_number', { ascending: true })
+  ])
+
+  if (!matchups || matchups.length === 0) {
+    const teamCount = (teams || []).length
+    if (teamCount < 2) {
+      document.getElementById('standingsBody').innerHTML = `
+        <div class="empty-state">Waiting for more teams to join before a schedule can be generated.</div>`
+      return
+    }
+    if (isRetry) {
+      // Already tried once and it still didn't produce a schedule — stop
+      // here instead of retrying forever, and show the real reason why.
+      document.getElementById('standingsBody').innerHTML = `
+        <div class="empty-state">Couldn't set up this season's schedule automatically.<br>Try refreshing the page — if this keeps happening, check the generate-schedule function's logs in Supabase.</div>`
+      return
+    }
+    // Auto-generate silently in the background — no button, no user action.
+    // Safe to call even if another team's page triggers this at the same
+    // moment: the function refuses (409) if a schedule already exists.
+    document.getElementById('standingsBody').innerHTML = `
+      <div class="empty-state">Setting up this season's schedule…</div>`
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-schedule', {
+        body: { league_id: leagueId, season_weeks: effectiveSeasonWeeks }
+      })
+      if (error || (data && data.ok === false)) {
+        console.error('Auto schedule generation failed:', error || data?.error)
+      }
+    } catch (err) {
+      console.error('Auto schedule generation error:', err)
+    }
+    return loadStandings(true) // re-fetch ONCE — if it's still empty, stop and show an error instead of looping
+  }
+
+  // Build per-team record from FINAL matchups only — scheduled games have
+  // no real result yet (scores default to 0 until live scoring is wired in).
+  const records = {}
+  for (const t of (teams || [])) {
+    records[t.id] = { name: t.team_name || 'Unnamed Team', wins: 0, losses: 0, ties: 0, pf: 0, pa: 0, streak: [] }
+  }
+
+  const finalMatchups = (matchups || []).filter(m => m.status === 'final')
+  for (const m of finalMatchups) {
+    const a = records[m.team_a_id], b = records[m.team_b_id]
+    if (!a || !b) continue
+    a.pf += m.team_a_score; a.pa += m.team_b_score
+    b.pf += m.team_b_score; b.pa += m.team_a_score
+    if (m.team_a_score > m.team_b_score) { a.wins++; b.losses++; a.streak.push('W'); b.streak.push('L') }
+    else if (m.team_b_score > m.team_a_score) { b.wins++; a.losses++; b.streak.push('W'); a.streak.push('L') }
+    else { a.ties++; b.ties++; a.streak.push('T'); b.streak.push('T') }
+  }
+
+  const rows = Object.entries(records).map(([id, r]) => {
+    let streakLabel = '—', streakClass = 'none'
+    if (r.streak.length > 0) {
+      const last = r.streak[r.streak.length - 1]
+      let n = 0
+      for (let i = r.streak.length - 1; i >= 0 && r.streak[i] === last; i--) n++
+      streakLabel = `${last}${n}`
+      streakClass = last === 'W' ? 'win' : last === 'L' ? 'loss' : 'none'
+    }
+    const played = r.wins + r.losses + r.ties
+    const pct = played > 0 ? (r.wins + r.ties * 0.5) / played : 0
+    const initials = (r.name || '?').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
+    return { id, ...r, streakLabel, streakClass, pct, initials }
+  }).sort((x, y) => (y.pct - x.pct) || (y.pf - x.pf))
+
+  const leader = rows[0]
+  rows.forEach(r => {
+    r.gb = leader ? ((leader.wins - r.wins) + (r.losses - leader.losses)) / 2 : 0
+  })
+
+  document.getElementById('standingsBody').innerHTML = `
+    <div class="table-scroll">
+    <table class="standings-table">
+      <thead><tr>
+        <th class="sticky-col sticky-1"></th><th class="sticky-col sticky-2">Team</th><th>Record</th><th class="num">PCT</th><th class="num">GB</th>
+        <th class="num">PF</th><th class="num">PA</th><th class="num">Streak</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map((r, i) => `
+          <tr class="${r.id === teamId ? 'me' : ''}">
+            <td class="sticky-col sticky-1"><span class="st-rank ${i < 3 ? 'gold-rank' : ''}">${i + 1}</span></td>
+            <td class="st-team sticky-col sticky-2"><span class="st-avatar">${r.initials}</span>${r.name}${r.id === teamId ? '<span class="st-team-you">← YOU</span>' : ''}</td>
+            <td class="st-record">${r.wins}-${r.losses}${r.ties ? '-' + r.ties : ''}</td>
+            <td class="num st-pct">${r.pct.toFixed(3).replace(/^0/, '')}</td>
+            <td class="num st-gb">${r.gb === 0 ? '—' : r.gb.toFixed(1)}</td>
+            <td class="num st-pts">${r.pf.toFixed(0)}</td>
+            <td class="num st-pts-against">${r.pa.toFixed(0)}</td>
+            <td class="num"><span class="st-streak ${r.streakClass}">${r.streakLabel}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    </div>`
+}
+
+async function loadTradeBadge() {
+  const { count } = await supabase.from('trades').select('id', { count: 'exact', head: true }).eq('receiver_team_id', teamId).eq('status', 'pending')
+  const badge = document.getElementById('tradeBadge')
+  if (badge && count > 0) { badge.textContent = count; badge.style.display = '' }
+}
+
+async function loadPackBadge() {
+  const { data: team } = await supabase.from('teams').select('pack_opened_week').eq('id', teamId).single()
+  const badge = document.getElementById('packBadge')
+  if (badge && team?.pack_opened_week !== leagueWeek) { badge.style.display = '' }
+}
+
+init()
+</script>
+</body>
+</html>
