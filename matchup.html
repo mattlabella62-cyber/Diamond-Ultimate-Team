@@ -382,6 +382,17 @@ async function init() {
   document.getElementById('coinSub').textContent = `${coins} coins this week`
   document.getElementById('coinFill').style.width = Math.min((coins / 500) * 100, 100) + '%'
 
+  // Linked here from Dashboard's "View Full Matchups" — start directly in
+  // the league-wide list instead of the single-matchup default.
+  if (new URLSearchParams(window.location.search).get('view') === 'all') {
+    viewMode = 'all'
+    const btn = document.getElementById('viewToggleBtn')
+    btn.textContent = '◀ Back to Single Matchup'
+    btn.classList.add('active')
+    document.querySelector('.switcher:nth-of-type(2) select').style.display = 'none'
+    document.querySelectorAll('.switcher:nth-of-type(2) .switcher-btn').forEach(b => b.style.display = 'none')
+  }
+
   await loadWeekMatchups()
   loadTradeBadge()
   loadPackBadge()
