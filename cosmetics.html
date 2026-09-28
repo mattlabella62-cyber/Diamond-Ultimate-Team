@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiamondUT — Cosmetics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --gold: #F5C518;
+  --gold2: #FFE066;
+  --gold-glow: rgba(245,197,24,0.3);
+  --red: #E8433B;
+  --green: #27C96A;
+  --blue: #3B8BF5;
+  --platinum-c: #c4b5fd;
+  --bronze-c: #f0a070;
+  --silver-c: #c0d8f0;
+  --bg: #060810;
+  --bg2: #0A0D14;
+  --surface: #0F1218;
+  --surface2: #151B25;
+  --surface3: #1C2333;
+  --border: #1E2535;
+  --border2: #283044;
+  --text: #E8ECF4;
+  --muted: #5A6A82;
+  --muted2: #3A4558;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(245,197,24,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(59,139,245,0.04) 0%, transparent 50%);
+}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 230px; height: 100vh; overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; z-index: 200; transition: transform 0.25s ease;
+}
+.logo {
+  padding: 22px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-diamond {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold), #FF8C00);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.logo-text { line-height: 1; }
+.logo-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; color: var(--gold); }
+.logo-sub { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+.nav { padding: 14px 12px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.nav-section { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted2); padding: 10px 8px 5px; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(245,197,24,0.1); color: var(--gold); border: 1px solid rgba(245,197,24,0.2); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; background: var(--gold); border-radius: 0 2px 2px 0;
+}
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; font-family: var(--font-mono); font-size: 9px; background: var(--red); color: white; padding: 2px 6px; border-radius: 99px; font-weight: 700; }
+.coin-widget {
+  margin: 12px;
+  background: linear-gradient(135deg, rgba(245,197,24,0.08), rgba(245,197,24,0.03));
+  border: 1px solid rgba(245,197,24,0.2); border-radius: 10px; padding: 14px;
+}
+.coin-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.coin-amount { font-family: var(--font-display); font-size: 34px; color: var(--gold); line-height: 1.1; margin-top: 2px; }
+.coin-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.coin-track { height: 4px; background: var(--border2); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.coin-fill { height: 100%; width: 68%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 99px; }
+
+/* ═══ MAIN ═══ */
+.main { margin-left: 230px; flex: 1; display: flex; flex-direction: column; transition: margin-left 0.25s ease; }
+.topbar {
+  height: 58px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 28px; gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-title { font-family: var(--font-display); font-size: 22px; letter-spacing: 3px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.week-pill { font-family: var(--font-mono); font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border2); padding: 5px 12px; border-radius: 99px; }
+
+/* ═══ CONTENT ═══ */
+.content { padding: 24px 28px 60px; display: flex; flex-direction: column; gap: 22px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--border); }
+.panel-title { font-family: var(--font-display); font-size: 16px; letter-spacing: 2px; }
+.panel-sub { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+.panel-body { padding: 20px; }
+
+/* ═══ CURRENT PREVIEW ═══ */
+.preview-row { display: flex; align-items: center; gap: 16px; }
+.preview-avatar {
+  width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 34px; flex-shrink: 0; border: 2px solid var(--border2); transition: all 0.2s;
+}
+.preview-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; }
+.preview-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ═══ AVATAR GRID ═══ */
+.avatar-category-head {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; color: var(--gold);
+  text-transform: uppercase; margin-top: 22px; margin-bottom: 8px;
+}
+.avatar-category-head:first-child { margin-top: 4px; }
+.avatar-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
+}
+.avatar-tile {
+  aspect-ratio: 1; border-radius: 14px; border: 2px solid var(--border2); background: var(--surface2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.avatar-tile:hover { transform: translateY(-2px); border-color: var(--muted); }
+.avatar-tile.selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245,197,24,0.25); }
+.avatar-tile.selected::after {
+  content: '✓'; position: absolute; top: 6px; right: 8px; color: var(--gold);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+}
+.avatar-emoji { font-size: 30px; }
+.avatar-tile-label { font-family: var(--font-mono); font-size: 8px; color: var(--muted); text-align: center; padding: 0 4px; line-height: 1.2; }
+
+.btn-save {
+  margin-top: 20px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  padding: 12px 26px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  background: var(--gold); border: none; color: var(--bg);
+}
+.btn-save:hover { background: var(--gold2); }
+.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface3); border: 1px solid var(--border2); border-radius: 8px;
+  padding: 12px 20px; font-family: var(--font-mono); font-size: 12px; color: var(--text);
+  opacity: 0; pointer-events: none; transition: all 0.25s; z-index: 500;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(39,201,106,0.4); color: var(--green); }
+.toast.error { border-color: rgba(232,67,59,0.4); color: var(--red); }
+
+.coming-soon {
+  font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-align: center;
+  padding: 30px 20px; border: 1px dashed var(--border2); border-radius: 10px; margin-top: 8px;
+}
+
+/* ═══ PACK SKINS SHOP ═══ */
+.skin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.skin-card {
+  border: 2px solid var(--border2); border-radius: 14px; overflow: hidden; background: var(--surface2);
+  transition: all 0.15s; position: relative;
+}
+.skin-card.equipped { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245,197,24,0.25); }
+.skin-swatch { height: 70px; position: relative; }
+.skin-equipped-badge {
+  position: absolute; top: 8px; right: 8px; font-family: var(--font-mono); font-size: 8px; font-weight: 700;
+  letter-spacing: 1px; color: var(--bg); background: var(--gold); padding: 3px 7px; border-radius: 99px;
+}
+.skin-info { padding: 12px 14px 14px; }
+.skin-name { font-family: var(--font-display); font-size: 16px; letter-spacing: 1px; }
+.skin-desc { font-family: var(--font-mono); font-size: 9px; color: var(--muted); margin-top: 3px; line-height: 1.4; min-height: 26px; }
+.skin-btn-row { margin-top: 10px; }
+.skin-btn {
+  width: 100%; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 9px 10px; border-radius: 7px; cursor: pointer; transition: all 0.15s; border: none;
+}
+.skin-btn.buy { background: rgba(245,197,24,0.12); border: 1px solid var(--gold); color: var(--gold); }
+.skin-btn.buy:hover { background: rgba(245,197,24,0.22); }
+.skin-btn.buy:disabled { opacity: 0.4; cursor: not-allowed; }
+.skin-btn.equip { background: var(--surface3); border: 1px solid var(--border2); color: var(--text); }
+.skin-btn.equip:hover { background: var(--surface); border-color: var(--muted); }
+.skin-btn.equipped { background: rgba(39,201,106,0.1); border: 1px solid var(--green); color: var(--green); cursor: default; }
+@media (max-width: 900px) { .skin-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .skin-grid { grid-template-columns: 1fr; } }
+
+/* ═══ MOBILE NAV ═══ */
+.hamburger-btn {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; margin-right: 6px; flex-shrink: 0;
+}
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190;
+}
+@media (max-width: 900px) {
+  .hamburger-btn { display: block; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop.visible { display: block; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 20px 16px; }
+  .topbar { padding: 0 14px; gap: 8px; flex-wrap: wrap; height: auto; min-height: 58px; padding-top: 8px; padding-bottom: 8px; }
+  .topbar-title { max-width: 140px; font-size: 18px; }
+  .avatar-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 480px) {
+  .content { padding: 16px 10px; }
+  .avatar-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+}
+
+/* ── Desktop sidebar collapse (separate from the mobile hamburger) ── */
+.collapse-btn {
+  position: fixed; top: 20px; left: 218px; z-index: 250;
+  width: 22px; height: 40px; border-radius: 0 8px 8px 0;
+  background: var(--surface2); border: 1px solid var(--border); border-left: none;
+  color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: left 0.25s ease, background 0.15s;
+}
+.collapse-btn:hover { background: var(--surface3, #1C2333); color: var(--text); }
+.collapse-btn.collapsed { left: 0; }
+.sidebar.collapsed { transform: translateX(-100%); }
+.main.sidebar-collapsed { margin-left: 0 !important; }
+@media (max-width: 900px) { .collapse-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-diamond">⬦</div>
+    <div class="logo-text">
+      <div class="logo-name">DiamondUT</div>
+      <div class="logo-sub" id="sidebarSportSub">MLB · SEASON 2026</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+    <a class="nav-item" href="roster.html"><span class="nav-icon">🃏</span> My Roster</a>
+    <a class="nav-item" href="auction.html"><span class="nav-icon">🏷️</span> Auction House</a>
+    <a class="nav-item" href="legendary.html"><span class="nav-icon">👑</span> Legendary</a>
+    <div class="nav-section">League</div>
+    <a class="nav-item" href="standings.html"><span class="nav-icon">🏆</span> Standings</a>
+    <a class="nav-item" href="matchup.html"><span class="nav-icon">⚔️</span> Matchup</a>
+    <a class="nav-item" href="history.html"><span class="nav-icon">📜</span> League History</a>
+    <a class="nav-item" href="trade.html"><span class="nav-icon">🔄</span> Trade Center<span class="nav-badge" id="tradeBadge" style="display:none">0</span></a>
+    <a class="nav-item" href="injury.html"><span class="nav-icon">🏥</span> Injury Pool</a>
+    <a class="nav-item" href="pack.html"><span class="nav-icon">📦</span> Open Pack<span class="nav-badge" id="packBadge" style="display:none">NEW</span></a>
+    <div class="nav-section">Account</div>
+    <a class="nav-item active" href="cosmetics.html"><span class="nav-icon">🎨</span> Cosmetics</a>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="coin-widget">
+    <div class="coin-label">Coin Balance</div>
+    <div class="coin-amount" id="coinAmount">500</div>
+    <div class="coin-sub" id="coinSub">500 coins this week</div>
+    <div class="coin-track"><div class="coin-fill" id="coinFill" style="width:100%"></div></div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileNav()"></div>
+<button class="collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()" title="Collapse sidebar">‹</button>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <button class="hamburger-btn" onclick="toggleMobileNav()">☰</button>
+    <div class="topbar-title">Cosmetics</div>
+    <div class="week-pill" id="weekPill">WEEK 1 OF 18</div>
+  </div>
+
+  <div class="content">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">YOUR AVATAR</div>
+          <div class="panel-sub">Shows up on Dashboard, Standings, Matchup &amp; everywhere else your team appears</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="preview-row">
+          <div class="preview-avatar" id="previewAvatar" style="background:var(--surface3);color:var(--muted)">--</div>
+          <div>
+            <div class="preview-name" id="previewName">Your Team</div>
+            <div class="preview-label">Current avatar</div>
+          </div>
+        </div>
+
+        <div id="avatarGrid"></div>
+
+        <button class="btn-save" id="saveBtn" onclick="saveAvatar()" disabled>SAVE AVATAR</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">PACK SKINS</div>
+          <div class="panel-sub">Spend coins to change how your pack openings look</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="skin-grid" id="skinGrid"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">SMACK-TALK BADGES</div>
+          <div class="panel-sub">Titles earned from real league moments, plus commissioner-assigned joke avatars</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="coming-soon">🚧 Coming soon — next up after Pack Skins.</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase } from './supabase.js'
+import { AVATAR_CATALOG, AVATAR_CATEGORIES, findAvatar } from './avatars.js'
+import { PACK_SKINS, findSkin } from './packskins.js'
+
+window.toggleMobileNav = function() {
+  document.querySelector('.sidebar').classList.toggle('open')
+  document.getElementById('sidebarBackdrop')?.classList.toggle('visible')
+}
+
+window.toggleSidebarCollapse = function() {
+  const collapsed = document.querySelector('.sidebar').classList.toggle('collapsed')
+  document.querySelector('.main').classList.toggle('sidebar-collapsed', collapsed)
+  document.getElementById('collapseBtn').classList.toggle('collapsed', collapsed)
+  document.getElementById('collapseBtn').textContent = collapsed ? '›' : '‹'
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0')
+}
+
+;(function restoreSidebarCollapse() {
+  if (localStorage.getItem('sidebarCollapsed') !== '1') return
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.sidebar')?.classList.add('collapsed')
+    document.querySelector('.main')?.classList.add('sidebar-collapsed')
+    const btn = document.getElementById('collapseBtn')
+    if (btn) { btn.classList.add('collapsed'); btn.textContent = '›' }
+  })
+})()
+
+let leagueId, teamId, sport, currentTeam
+let selectedAvatarId = null
+
+function renderGrid() {
+  const grid = document.getElementById('avatarGrid')
+  grid.innerHTML = AVATAR_CATEGORIES.map(cat => `
+    <div class="avatar-category-head">${cat}</div>
+    <div class="avatar-grid">
+      ${AVATAR_CATALOG.filter(a => a.category === cat).map(a => `
+        <div class="avatar-tile ${a.id === selectedAvatarId ? 'selected' : ''}" onclick="pickAvatar('${a.id}')" title="${a.label}">
+          <div class="avatar-emoji">${a.emoji}</div>
+          <div class="avatar-tile-label">${a.label}</div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('')
+}
+
+function updatePreview() {
+  const a = findAvatar(selectedAvatarId)
+  const el = document.getElementById('previewAvatar')
+  if (a) {
+    el.textContent = a.emoji
+    el.style.background = a.color + '22'
+    el.style.borderColor = a.color
+  } else {
+    const initials = (currentTeam?.team_name || currentTeam?.name || 'T').slice(0,2).toUpperCase()
+    el.textContent = initials
+    el.style.background = 'var(--surface3)'
+    el.style.borderColor = 'var(--border2)'
+  }
+  document.getElementById('previewName').textContent = currentTeam?.team_name || currentTeam?.name || 'Your Team'
+}
+
+window.pickAvatar = function(id) {
+  selectedAvatarId = id
+  renderGrid()
+  updatePreview()
+  document.getElementById('saveBtn').disabled = false
+}
+
+window.saveAvatar = async function() {
+  if (!selectedAvatarId || !teamId) return
+  const btn = document.getElementById('saveBtn')
+  btn.disabled = true
+  btn.textContent = 'SAVING...'
+  const { error } = await supabase.from('teams').update({ avatar_id: selectedAvatarId }).eq('id', teamId)
+  if (error) {
+    showToast('Failed to save avatar — try again.', 'error')
+    btn.disabled = false
+    btn.textContent = 'SAVE AVATAR'
+    return
+  }
+  showToast('Avatar saved!', 'success')
+  btn.textContent = 'SAVED ✓'
+  setTimeout(() => { btn.textContent = 'SAVE AVATAR'; btn.disabled = true }, 1500)
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = `toast show ${type}`
+  setTimeout(() => { t.className = 'toast' }, 2500)
+}
+
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = 'login.html'; return }
+
+  leagueId = localStorage.getItem('activeLeagueId')
+  teamId   = localStorage.getItem('activeTeamId')
+  if (!leagueId || !teamId) { window.location.href = 'dashboard.html'; return }
+
+  const { data: leagueRow } = await supabase.from('leagues').select('week_number, season_weeks, sport').eq('id', leagueId).single()
+  sport = leagueRow?.sport || localStorage.getItem('activeSport') || 'MLB'
+  localStorage.setItem('activeSport', sport)
+  document.getElementById('sidebarSportSub').textContent = `${sport} · SEASON 2026`
+  document.getElementById('weekPill').textContent = `WEEK ${leagueRow?.week_number || 1} OF ${leagueRow?.season_weeks || (sport === 'MLB' ? 26 : 18)}`
+
+  const { data: team } = await supabase.from('teams').select('*').eq('id', teamId).single()
+  currentTeam = team
+  if (team) {
+    document.getElementById('coinAmount').textContent = team.coins ?? 0
+    document.getElementById('coinSub').textContent = `${team.coins ?? 0} coins this week`
+    document.getElementById('coinFill').style.width = Math.min(((team.coins ?? 0) / 500) * 100, 100) + '%'
+    selectedAvatarId = team.avatar_id || null
+  }
+
+  renderGrid()
+  updatePreview()
+  renderSkinShop()
+  loadTradeBadge()
+  loadPackBadge()
+}
+
+// ── Pack Skins shop ─────────────────────────────────────────────────────
+function renderSkinShop() {
+  const owned = currentTeam?.owned_skins || ['classic']
+  const equipped = currentTeam?.equipped_skin || 'classic'
+  const grid = document.getElementById('skinGrid')
+  grid.innerHTML = PACK_SKINS.map(s => {
+    const isOwned = owned.includes(s.id)
+    const isEquipped = equipped === s.id
+    const canAfford = (currentTeam?.coins ?? 0) >= s.price
+    let btnHtml
+    if (isEquipped) {
+      btnHtml = `<button class="skin-btn equipped" disabled>EQUIPPED ✓</button>`
+    } else if (isOwned) {
+      btnHtml = `<button class="skin-btn equip" onclick="equipSkin('${s.id}')">EQUIP</button>`
+    } else {
+      btnHtml = `<button class="skin-btn buy" onclick="buySkin('${s.id}')" ${canAfford ? '' : 'disabled'}>${canAfford ? `BUY — ${s.price} COINS` : `NEED ${s.price} COINS`}</button>`
+    }
+    return `
+      <div class="skin-card ${isEquipped ? 'equipped' : ''}">
+        <div class="skin-swatch" style="background:linear-gradient(135deg, ${s.swatch[0]}, ${s.swatch[1]} 55%, ${s.swatch[2]})">
+          ${isEquipped ? '<span class="skin-equipped-badge">EQUIPPED</span>' : ''}
+        </div>
+        <div class="skin-info">
+          <div class="skin-name">${s.name}</div>
+          <div class="skin-desc">${s.description}</div>
+          <div class="skin-btn-row">${btnHtml}</div>
+        </div>
+      </div>`
+  }).join('')
+}
+
+window.buySkin = async function(skinId) {
+  const skin = findSkin(skinId)
+  const owned = currentTeam?.owned_skins || ['classic']
+  if (owned.includes(skinId)) return
+  if ((currentTeam.coins ?? 0) < skin.price) { showToast("Not enough coins for that skin.", 'error'); return }
+
+  const newOwned = [...owned, skinId]
+  const newCoins = (currentTeam.coins ?? 0) - skin.price
+  const { error } = await supabase.from('teams').update({ owned_skins: newOwned, coins: newCoins }).eq('id', teamId)
+  if (error) { showToast('Purchase failed — try again.', 'error'); return }
+
+  currentTeam.owned_skins = newOwned
+  currentTeam.coins = newCoins
+  document.getElementById('coinAmount').textContent = newCoins
+  document.getElementById('coinSub').textContent = `${newCoins} coins this week`
+  document.getElementById('coinFill').style.width = Math.min((newCoins / 500) * 100, 100) + '%'
+  renderSkinShop()
+  showToast(`${skin.name} unlocked!`, 'success')
+}
+
+window.equipSkin = async function(skinId) {
+  const { error } = await supabase.from('teams').update({ equipped_skin: skinId }).eq('id', teamId)
+  if (error) { showToast('Failed to equip — try again.', 'error'); return }
+  currentTeam.equipped_skin = skinId
+  renderSkinShop()
+  showToast(`${findSkin(skinId).name} equipped!`, 'success')
+}
+
+async function loadTradeBadge() {
+  const { count } = await supabase.from('trades').select('id', { count: 'exact', head: true }).eq('receiver_team_id', teamId).eq('status', 'pending')
+  const badge = document.getElementById('tradeBadge')
+  if (badge && count > 0) { badge.textContent = count; badge.style.display = '' }
+}
+
+async function loadPackBadge() {
+  const { data: team } = await supabase.from('teams').select('pack_opened_week').eq('id', teamId).single()
+  const { data: leagueRow } = await supabase.from('leagues').select('week_number').eq('id', leagueId).single()
+  const badge = document.getElementById('packBadge')
+  if (badge && team?.pack_opened_week !== (leagueRow?.week_number || 1)) { badge.style.display = '' }
+}
+
+init()
+</script>
+</body>
+</html>
