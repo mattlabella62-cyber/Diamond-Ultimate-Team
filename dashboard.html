@@ -180,6 +180,31 @@ body {
 }
 .player-card.legendary:hover { box-shadow: 0 14px 50px rgba(255,140,0,0.65); }
 
+/* ── Pack skin reskins — border/box-shadow stay tier-colored (so rarity
+   still reads at a glance), only the card's own interior gradient and
+   name/points text pick up the equipped skin's palette. Colors mirror
+   each skin's entry in packskins.js (swatch[0]/[1] = background,
+   swatch[2] = accent text). No rule for "classic" — it's the default. */
+.player-card.skin-inferno    { background: linear-gradient(160deg, #2e0a0a, #4a1005); }
+.player-card.skin-frostbite  { background: linear-gradient(160deg, #0a1a2e, #0a2a3a); }
+.player-card.skin-toxic      { background: linear-gradient(160deg, #0a1a0a, #0a2a10); }
+.player-card.skin-golden     { background: linear-gradient(160deg, #2a1a05, #3a2408); }
+.player-card.skin-void       { background: linear-gradient(160deg, #08050f, #150a2a); }
+.player-card.skin-camo       { background: linear-gradient(160deg, #1c2814, #2b3a1f); }
+.player-card.skin-digital    { background: linear-gradient(160deg, #1a1a1a, #2e2e2e); }
+.player-card.skin-chrome     { background: linear-gradient(160deg, #0d0d0d, #3a3a3a); }
+.player-card.skin-prestige   { background: linear-gradient(160deg, #000000, #1a1408); }
+
+.skin-inferno .card-name,   .skin-inferno .card-coin   { color: #ff8c3c; }
+.skin-frostbite .card-name, .skin-frostbite .card-coin { color: #c0f0ff; }
+.skin-toxic .card-name,     .skin-toxic .card-coin     { color: #aaff4d; }
+.skin-golden .card-name,    .skin-golden .card-coin    { color: #ffd166; }
+.skin-void .card-name,      .skin-void .card-coin      { color: #c080ff; }
+.skin-camo .card-name,      .skin-camo .card-coin      { color: #a3c178; }
+.skin-digital .card-name,   .skin-digital .card-coin   { color: #4dd0e1; }
+.skin-chrome .card-name,    .skin-chrome .card-coin    { color: #e8feff; }
+.skin-prestige .card-name,  .skin-prestige .card-coin  { color: #ffd700; }
+
 /* Card shine */
 .card-shine {
   position: absolute; inset: 0;
@@ -533,22 +558,12 @@ import { supabase } from './supabase.js'
 import { findAvatar } from './avatars.js'
 import { findSkin } from './packskins.js'
 
-// Turns a skin's swatch[2] accent hex into a layered glow applied to a
-// player card via `filter: drop-shadow(...)`, not `box-shadow` — filter
-// traces the card's actual rounded silhouette and isn't clipped by the
-// card's own `overflow: hidden`, so it reads as a clean halo instead of
-// a clipped rectangle. Classic (or no skin) renders no glow at all.
-function hexToRgbStr(hex) {
-  const h = hex.replace('#', '')
-  const r = parseInt(h.substring(0, 2), 16)
-  const g = parseInt(h.substring(2, 4), 16)
-  const b = parseInt(h.substring(4, 6), 16)
-  return `${r},${g},${b}`
-}
-function skinGlowStyle(skinId) {
-  if (!skinId || skinId === 'classic') return ''
-  const rgb = hexToRgbStr(findSkin(skinId).swatch[2])
-  return `filter: drop-shadow(0 0 6px rgba(${rgb},0.65)) drop-shadow(0 0 14px rgba(${rgb},0.4));`
+// Returns the CSS class that reskins a card's interior background/text
+// to the equipped skin's palette (see the `.skin-X` rules in <style>).
+// Tier border/box-shadow are untouched by that class, so rarity still
+// reads at a glance. Classic (or no skin) adds no class at all.
+function skinClass(skinId) {
+  return (skinId && skinId !== 'classic') ? `skin-${skinId}` : ''
 }
 
 const BATTER_POS  = ['C','1B','2B','3B','SS','OF','DH','LF','CF','RF','UTIL']
@@ -584,7 +599,7 @@ function buildCard(r, sport, skinId) {
   const ptsHtml  = p.is_injured
     ? `<div class="card-pts injured">INJURED</div>`
     : pts > 0 ? `<div class="card-pts">+${pts} pts</div>` : `<div class="card-pts zero">--</div>`
-  return `<div class="player-card ${p.tier}" style="${skinGlowStyle(skinId)}">
+  return `<div class="player-card ${p.tier} ${skinClass(skinId)}">
     <div class="card-rays"></div><div class="card-glow"></div><div class="card-shine"></div>
     <div class="card-tier">${p.tier.toUpperCase()}</div>
     <div class="card-coin">${tierVals[p.tier]||''}</div>
