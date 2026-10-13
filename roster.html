@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiamondUT — Roster</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --font-display: "Bebas Neue", "Arial Black", sans-serif;
+  --font-body: "DM Sans", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+  --gold: #F5C518; --gold2: #FFE066; --gold-glow: rgba(245,197,24,0.3);
+  --red: #E8433B; --green: #27C96A; --blue: #3B8BF5;
+  --bg: #060810; --surface: #0F1218; --surface2: #151B25;
+  --border: #1E2535; --border2: #283044;
+  --text: #E8ECF4; --muted: #5A6A82; --muted2: #3A4558;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-body); min-height: 100vh;
+  display: flex; overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(180,120,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(80,200,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255,80,200,0.06) 0%, transparent 50%);
+}
+
+.page-header { text-align: center; margin-bottom: 32px; }
+.page-header-title {
+  font-family: var(--font-display); font-size: 38px; letter-spacing: 5px;
+  background: linear-gradient(135deg, #fff 0%, #a0e0ff 30%, #e0a0ff 60%, #ffd166 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; filter: drop-shadow(0 0 20px rgba(180,140,255,0.5));
+}
+.page-header-sub {
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  letter-spacing: 3px; margin-top: 6px;
+}
+.page-sport-badge {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px;
+  padding: 4px 14px; border-radius: 99px; margin-top: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
+}
+
+.hint-bar {
+  text-align: center; padding: 10px 20px; margin-bottom: 24px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 10px; font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); letter-spacing: 1px; max-width: 960px;
+  margin-left: auto; margin-right: auto;
+}
+.hint-bar span { color: var(--gold); }
+
+.section-label {
+  font-family: var(--font-display); font-size: 16px; letter-spacing: 4px;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  padding-bottom: 8px; margin: 24px auto 16px;
+  max-width: 960px;
+}
+
+.card-grid {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  max-width: 960px; margin: 0 auto 24px;
+}
+
+.card-scene {
+  width: 145px; height: 210px;
+  perspective: 600px; cursor: pointer; position: relative;
+}
+.card-scene.legendary-scene {
+  width: 150px;
+  height: 270px;  /* extra space for crown, meta, and boost rows */
+}
+.card-scene.selected-from .player-card {
+  box-shadow: 0 0 0 3px var(--gold), 0 0 20px var(--gold-glow) !important;
+}
+
+.player-card {
+  width: 100%; height: 100%;
+  position: absolute; inset: 0; border-radius: 14px; overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-scene:hover .player-card { transform: translateY(-4px) scale(1.02); }
+.player-card.bronze   { background: linear-gradient(160deg,#5a1a00,#2e0e00); border: 1px solid rgba(210,100,50,0.65); box-shadow: 0 4px 20px rgba(210,100,50,0.2); }
+.player-card.silver   { background: linear-gradient(160deg,#1a2a3e,#0d1824); border: 1px solid rgba(100,160,220,0.6);  box-shadow: 0 4px 20px rgba(80,140,210,0.2); }
+.player-card.gold     { background: linear-gradient(160deg,#5a3800,#2e1c00); border: 1px solid rgba(240,180,0,0.7);    box-shadow: 0 4px 20px rgba(240,180,0,0.25); }
+.player-card.platinum { background: linear-gradient(160deg,#2e0a7a,#160542); border: 1px solid rgba(155,80,255,0.7);  box-shadow: 0 4px 20px rgba(140,60,240,0.25); }
+.player-card.legendary{ background: linear-gradient(160deg,#7a3500,#3d1a00); border: 1px solid rgba(255,180,0,0.85); animation: legendaryPulse 2s ease-in-out infinite; }
+.player-card.common   { background: linear-gradient(160deg,#1a1a2e,#0d0d1a); border: 1px solid rgba(100,100,140,0.5); box-shadow: 0 4px 14px rgba(60,60,100,0.2); }
+@keyframes legendaryPulse { 0%,100%{box-shadow:0 4px 30px rgba(255,140,0,0.4);} 50%{box-shadow:0 8px 60px rgba(255,140,0,0.8);} }
+
+/* ── Pack skin reskins — full takeover: background AND border/glow both
+   become the equipped skin's palette. Rarity no longer reads from card
+   color — it reads from the .card-tier badge (BRONZE/SILVER/GOLD/etc,
+   untouched by these rules) and the .card-coin point number, which
+   stays tier-colored on purpose as a second at-a-glance anchor. Colors
+   mirror each skin's entry in packskins.js (swatch[0]/[1] = background,
+   swatch[2] = accent border/glow/name text). No rule for "classic". */
+.player-card.skin-inferno    { background: linear-gradient(160deg, #4a0a0a, #2b0505); border: 1px solid rgba(255,59,59,0.6); box-shadow: 0 4px 20px rgba(255,59,59,0.25); }
+.player-card.skin-frostbite  { background: linear-gradient(160deg, #0a3a30, #0a2e28); border: 1px solid rgba(122,255,224,0.6); box-shadow: 0 4px 20px rgba(122,255,224,0.25); }
+.player-card.skin-toxic      { background: linear-gradient(160deg, #0a1a0a, #0a2a10); border: 1px solid rgba(170,255,77,0.6); box-shadow: 0 4px 20px rgba(170,255,77,0.25); }
+.player-card.skin-golden     { background: linear-gradient(160deg, #3a3208, #2a2505); border: 1px solid rgba(232,255,110,0.65); box-shadow: 0 4px 20px rgba(232,255,110,0.3); }
+.player-card.skin-void       { background: linear-gradient(160deg, #2a0a1a, #0f050a); border: 1px solid rgba(255,102,196,0.6); box-shadow: 0 4px 20px rgba(255,102,196,0.3); }
+.player-card.skin-camo       { background: linear-gradient(160deg, #1c2814, #2b3a1f); border: 1px solid rgba(163,193,120,0.55); box-shadow: 0 4px 20px rgba(122,143,74,0.25); }
+.player-card.skin-digital    { background: linear-gradient(160deg, #1a2e2e, #1a1a1a); border: 1px solid rgba(77,255,200,0.6); box-shadow: 0 4px 20px rgba(77,255,200,0.25); }
+.player-card.skin-chrome     { background: linear-gradient(160deg, #3a3a3a, #0d0d0d); border: 1px solid rgba(245,245,245,0.6); box-shadow: 0 4px 20px rgba(245,245,245,0.2); }
+.player-card.skin-prestige   { background: linear-gradient(160deg, #1a0a10, #000000); border: 1px solid rgba(255,77,109,0.6); box-shadow: 0 4px 20px rgba(255,77,109,0.25); }
+.player-card.skin-gridrunner { background: linear-gradient(160deg, #04141f, #000000); border: 1px solid rgba(41,224,255,0.7); box-shadow: 0 4px 20px rgba(41,224,255,0.3); }
+
+.skin-inferno .card-name    { color: #ff3b3b; }
+.skin-frostbite .card-name  { color: #7affe0; }
+.skin-toxic .card-name      { color: #aaff4d; }
+.skin-golden .card-name     { color: #e8ff6e; }
+.skin-void .card-name       { color: #ff66c4; }
+.skin-camo .card-name       { color: #a3c178; }
+.skin-digital .card-name    { color: #4dffc8; }
+.skin-chrome .card-name     { color: #f5f5f5; }
+.skin-prestige .card-name   { color: #ff4d6d; }
+.skin-gridrunner .card-name { color: #29e0ff; }
+.card-boosts { position:absolute; bottom:0; left:0; right:0; padding:4px 4px 2px; display:flex; flex-direction:column; gap:2px; }
+.card-boost-row { display:flex; align-items:center; gap:4px; background:rgba(20,12,0,0.9); border:1px solid rgba(255,215,0,0.25); border-radius:4px; padding:3px 6px; }
+.cb-icon { font-size:9px; }
+.cb-label { font-size:8px; font-weight:600; color:rgba(255,215,0,0.85); flex:1; line-height:1.2; }
+.cb-pts { font-size:8px; font-weight:800; color:#ffd700; white-space:nowrap; }
+
+/* ── Legendary card (matches legendary.html's featured card look, scaled for the roster grid) ── */
+.leg-card-mini {
+  position:absolute; inset:0; border-radius:14px; overflow:hidden;
+  background:linear-gradient(160deg,#1a1200 0%,#0d0f14 50%,#1a0800 100%);
+  border:1px solid rgba(255,215,0,0.25);
+  display:flex; flex-direction:column;
+}
+.leg-card-mini .leg-card-border {
+  position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  border:2px solid rgba(255,215,0,0.6); z-index:10;
+  animation:legBorderPulse 2s ease-in-out infinite;
+}
+.leg-card-mini::before {
+  content:''; position:absolute; inset:0; border-radius:14px;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,215,0,0.08) 50%,transparent 60%);
+  background-size:200% 100%; animation:legShine 3s ease-in-out infinite;
+  z-index:5; pointer-events:none;
+}
+@keyframes legShine { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+@keyframes legBorderPulse {
+  0%,100%{border-color:rgba(255,215,0,0.4);box-shadow:0 0 8px rgba(255,215,0,0.1)}
+  50%{border-color:rgba(255,215,0,0.9);box-shadow:0 0 20px rgba(255,215,0,0.4)}
+}
+.leg-particles-mini { position:absolute; inset:0; pointer-events:none; z-index:4; overflow:hidden; }
+.leg-particle {
+  position:absolute; width:2px; height:2px; background:#ffd700; border-radius:50%;
+  animation:legFloat var(--dur,3s) var(--delay,0s) ease-in-out infinite;
+}
+@keyframes legFloat {
+  0%{transform:translateY(100%) translateX(var(--x,0px));opacity:0}
+  20%{opacity:0.8} 80%{opacity:0.4}
+  100%{transform:translateY(-20px) translateX(var(--x,0px));opacity:0}
+}
+.leg-card-top-mini { padding:6px 8px 3px; display:flex; align-items:center; justify-content:space-between; z-index:6; position:relative; }
+.leg-year-badge {
+  background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));
+  border:1px solid rgba(255,215,0,0.4); border-radius:5px;
+  font-size:7px; font-weight:800; letter-spacing:0.5px; padding:2px 5px; color:#ffd700;
+}
+.leg-stamp-mini { font-size:6px; font-weight:900; letter-spacing:1px; color:rgba(255,215,0,0.5); text-transform:uppercase; }
+.leg-card-art-mini { flex:1; display:flex; align-items:center; justify-content:center; position:relative; z-index:6; padding:4px; min-height:80px; }
+.leg-card-art-mini img { width:88%; height:auto; object-fit:contain; filter:drop-shadow(0 0 16px rgba(255,215,0,0.5)) sepia(1) saturate(3) hue-rotate(5deg) brightness(1.2); }
+.leg-card-info-mini {
+  padding:4px 8px 4px; z-index:6; position:relative; text-align:center;
+  background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);
+}
+.leg-crown-mini { font-size:14px; margin-bottom:1px; }
+.leg-player-name-mini {
+  font-size:11px; font-weight:900; color:#fff; letter-spacing:.2px; text-transform:uppercase;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.leg-player-meta-mini { display:flex; align-items:center; justify-content:center; gap:4px; margin-top:2px; }
+.leg-pos-mini {
+  font-size:7px; font-weight:800; color:#ffd700; background:rgba(255,215,0,0.1);
+  border:1px solid rgba(255,215,0,0.25); border-radius:3px; padding:1px 4px;
+}
+.leg-team-mini { font-size:7px; color:var(--muted); font-weight:600; }
+.leg-boosts-mini { padding:4px 8px 8px; z-index:6; position:relative; display:flex; flex-direction:column; gap:3px; }
+.leg-boost-row-mini {
+  display:flex; align-items:center; gap:4px; background:rgba(255,215,0,0.05);
+  border:1px solid rgba(255,215,0,0.12); border-radius:4px; padding:3px 6px;
+}
+.leg-boost-icon-mini { font-size:8px; }
+.leg-boost-label-mini { font-size:7px; font-weight:600; color:rgba(255,215,0,0.8); flex:1; line-height:1.2; }
+.leg-boost-pts-mini { font-size:7px; font-weight:800; color:#ffd700; white-space:nowrap; }
+.leg-boost-dual-mini { font-size:6px; color:var(--green); font-weight:700; }
+
+.card-rays { position:absolute;inset:0;z-index:0;background:repeating-conic-gradient(rgba(255,255,255,0.04) 0deg 10deg,transparent 10deg 20deg); }
+.card-glow { position:absolute;bottom:52px;left:50%;transform:translateX(-50%);width:120px;height:50px;border-radius:50%;z-index:1;filter:blur(18px); }
+.player-card.bronze .card-glow   { background:rgba(210,100,50,0.7); }
+.player-card.silver .card-glow   { background:rgba(80,140,220,0.7); }
+.player-card.gold .card-glow     { background:rgba(240,180,0,0.7); }
+.player-card.platinum .card-glow { background:rgba(140,60,255,0.7); }
+.player-card.legendary .card-glow{ background:rgba(255,140,0,0.9); }
+.player-card.common .card-glow   { background:rgba(80,80,120,0.5); }
+/* Skinned cards: the glow blob behind the art matches the skin, not the tier. */
+.player-card.skin-inferno .card-glow    { background: rgba(255,59,59,0.7); }
+.player-card.skin-frostbite .card-glow  { background: rgba(122,255,224,0.7); }
+.player-card.skin-toxic .card-glow      { background: rgba(170,255,77,0.7); }
+.player-card.skin-golden .card-glow     { background: rgba(232,255,110,0.7); }
+.player-card.skin-void .card-glow       { background: rgba(255,102,196,0.7); }
+.player-card.skin-camo .card-glow       { background: rgba(163,193,120,0.6); }
+.player-card.skin-digital .card-glow    { background: rgba(77,255,200,0.7); }
+.player-card.skin-chrome .card-glow     { background: rgba(245,245,245,0.6); }
+.player-card.skin-prestige .card-glow   { background: rgba(255,77,109,0.7); }
+.player-card.skin-gridrunner .card-glow { background: rgba(41,224,255,0.75); }
+/* Skinned cards: hide the plain-white sunburst rays so the skin's own
+   background/pattern reads clean instead of fighting with it. */
+.player-card[class*="skin-"] .card-rays { display: none; }
+.card-shine { position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 50%,rgba(255,255,255,0.02) 100%);z-index:3; }
+
+.card-tier { position:absolute;top:8px;left:8px;font-family:var(--font-display);font-size:9px;letter-spacing:1px;padding:3px 7px;border-radius:4px;z-index:10; }
+.player-card.bronze .card-tier   { background:rgba(0,0,0,0.4);color:#f0a070;border:1px solid rgba(210,100,50,0.5); }
+.player-card.silver .card-tier   { background:rgba(0,0,0,0.4);color:#c0d8f0;border:1px solid rgba(100,160,220,0.5); }
+.player-card.gold .card-tier     { background:rgba(0,0,0,0.4);color:#ffe066;border:1px solid rgba(240,180,0,0.5); }
+.player-card.platinum .card-tier { background:rgba(0,0,0,0.4);color:#c4b5fd;border:1px solid rgba(155,80,255,0.5); }
+.player-card.legendary .card-tier{ background:rgba(0,0,0,0.4);color:#FFD166;border:1px solid rgba(255,180,0,0.7); }
+.player-card.common .card-tier   { background:rgba(0,0,0,0.4);color:#a0a0c0;border:1px solid rgba(100,100,140,0.5); }
+
+.card-coin { position:absolute;top:8px;right:8px;font-family:var(--font-mono);font-size:10px;font-weight:700;z-index:10; }
+.player-card.bronze .card-coin { color:#f0a070; }
+.player-card.silver .card-coin { color:#c0d8f0; }
+.player-card.gold .card-coin   { color:#ffe066; }
+.player-card.platinum .card-coin { color:#c4b5fd; }
+.player-card.legendary .card-coin{ color:#FFD166; }
+.player-card.common .card-coin  { color:#a0a0c0; }
+
+.card-art-batter { position:absolute;top:35px;left:0;right:0;bottom:52px;display:flex;align-items:center;justify-content:center;overflow:hidden; }
+.card-art-batter .card-art-fill { width:95%;height:95%; }
+.card-art-pitcher { position:absolute;top:28px;left:0;right:0;height:118px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden; }
+.card-art-pitcher .card-art-fill { height:110px;width:110px;position:absolute;bottom:0;left:50%;transform:translateX(-50%); }
+
+/* ── Silhouette fill: the real player art stays the mask (shape only);
+   what paints inside that shape is a themed pattern per equipped skin,
+   instead of flat white. No separate art assets needed per skin. ── */
+.card-art-fill {
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  filter: drop-shadow(0 0 16px rgba(255,255,255,0.5));
+  z-index: 2;
+}
+/* Flat, solid-color silhouettes — the player himself is tinted to the
+   skin's color (e.g. toxic = green player, gridrunner = cyan player),
+   no texture/pattern, so it always reads clean at any card size. */
+.card-art-fill.fill-classic    { background: #fff; }
+.card-art-fill.fill-inferno    { background: #fff; }
+.card-art-fill.fill-frostbite  { background: #fff; }
+.card-art-fill.fill-toxic      { background: #fff; }
+.card-art-fill.fill-golden     { background: #fff; }
+.card-art-fill.fill-void       { background: #fff; }
+.card-art-fill.fill-camo       { background: #e3c88f; }
+.card-art-fill.fill-digital    { background: #fff; }
+.card-art-fill.fill-chrome     { background: linear-gradient(100deg, #fff 25%, #fff 38%, #c9c9c9 44%, #fff 50%, #fff 70%); }
+.card-art-fill.fill-prestige   { background: #e8e8ee; }
+.card-art-fill.fill-gridrunner { background: #fff; }
+
+.card-divider { position:absolute;top:146px;left:10px;right:10px;height:1px;z-index:4; }
+.player-card.bronze .card-divider   { background:rgba(210,100,50,0.4); }
+.player-card.silver .card-divider   { background:rgba(100,160,220,0.35); }
+.player-card.gold .card-divider     { background:rgba(240,180,0,0.4); }
+.player-card.platinum .card-divider { background:rgba(155,80,255,0.4); }
+.player-card.legendary .card-divider{ background:rgba(255,180,0,0.6); }
+.player-card.common .card-divider   { background:rgba(100,100,140,0.3); }
+
+.card-info { position:absolute;bottom:0;left:0;right:0;padding:8px 10px 10px;background:rgba(0,0,0,0.6);z-index:5; }
+.card-name { font-family:var(--font-display);font-size:14px;letter-spacing:1px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.player-card.bronze .card-name   { color:#f0a070; }
+.player-card.silver .card-name   { color:#c0d8f0; }
+.player-card.gold .card-name     { color:#ffe066; }
+.player-card.platinum .card-name { color:#c4b5fd; }
+.player-card.legendary .card-name{ color:#FFD166; text-shadow:0 0 10px rgba(255,180,0,0.6); }
+.player-card.common .card-name   { color:#c0c0d8; }
+.card-pos-team { font-family:var(--font-mono);font-size:9px;color:#5A6A82;margin-top:3px;display:flex;justify-content:space-between; }
+
+.swap-btn {
+  position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  padding: 4px 10px; border-radius: 6px; border: none;
+  cursor: pointer; z-index: 20; transition: all 0.2s; letter-spacing: 1px;
+}
+.swap-btn.select-btn {
+  background: rgba(245,197,24,0.15); border: 1px solid var(--gold); color: var(--gold);
+}
+.swap-btn.select-btn:hover { background: rgba(245,197,24,0.3); }
+.swap-btn.swap-to-btn {
+  background: rgba(39,201,106,0.15); border: 1px solid var(--green); color: var(--green);
+}
+.swap-btn.swap-to-btn:hover { background: rgba(39,201,106,0.3); }
+.swap-btn.cancel-btn {
+  background: rgba(232,67,59,0.15); border: 1px solid var(--red); color: var(--red);
+}
+.swap-btn.cancel-btn:hover { background: rgba(232,67,59,0.3); }
+
+.swap-btn.keep-btn {
+  background: rgba(59,139,245,0.15); border: 1px solid var(--blue); color: var(--blue);
+}
+.swap-btn.keep-btn:hover { background: rgba(59,139,245,0.3); }
+.swap-btn.queued-btn {
+  background: rgba(39,201,106,0.2); border: 1px solid var(--green); color: var(--green);
+}
+.swap-btn.queued-btn:hover { background: rgba(232,67,59,0.2); border-color: var(--red); color: var(--red); }
+.swap-btn.disabled-btn {
+  background: rgba(90,106,130,0.12); border: 1px solid var(--muted2); color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ── Keeper Queue panel ── */
+.keeper-panel {
+  max-width: 960px; margin: 0 auto 24px; background: var(--surface2);
+  border: 1px solid var(--border2); border-radius: 12px; padding: 16px 18px;
+}
+.keeper-panel-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap;
+}
+.keeper-panel-title {
+  font-family: var(--font-display); font-size: 18px; letter-spacing: 1px; color: var(--text);
+}
+.keeper-panel-title span { color: var(--gold); }
+.keeper-mode-btn {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all .2s;
+  background: rgba(245,197,24,0.12); border: 1px solid var(--gold); color: var(--gold);
+}
+.keeper-mode-btn:hover { background: rgba(245,197,24,0.25); }
+.keeper-mode-btn.active {
+  background: rgba(232,67,59,0.15); border-color: var(--red); color: var(--red);
+}
+.keeper-panel-sub {
+  font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 6px; line-height: 1.5;
+}
+.keeper-list {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+}
+.keeper-chip {
+  display: flex; align-items: center; gap: 8px; background: var(--surface3, #1C2333);
+  border: 1px solid var(--border2); border-radius: 8px; padding: 6px 10px;
+  font-family: var(--font-mono); font-size: 11px;
+}
+.keeper-chip .kc-name { color: var(--text); font-weight: 600; }
+.keeper-chip .kc-cost { color: var(--gold); }
+.keeper-chip .kc-remove {
+  background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0 2px;
+}
+.keeper-chip .kc-remove:hover { color: var(--red); }
+.keeper-empty { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 14px; }
+.keeper-panel-foot {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 14px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+}
+.keeper-panel-foot .kf-count.maxed { color: var(--gold); }
+.keeper-panel-foot .kf-cost.over { color: var(--red); }
+
+.dst-abbrev {
+  font-family: var(--font-display); font-size: 32px; letter-spacing: 3px;
+  color: white; text-shadow: 0 0 20px rgba(255,255,255,0.5);
+  position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; z-index: 2;
+}
+
+.empty-slot {
+  width: 145px; height: 210px; border-radius: 14px;
+  border: 2px dashed var(--border2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; color: var(--muted2);
+}
+.empty-slot-pos { font-family: var(--font-display); font-size: 18px; letter-spacing: 2px; }
+.empty-slot-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 230px; height: 100vh; overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; z-index: 200; transition: transform 0.25s ease;
+}
+.logo {
+  padding: 22px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-diamond {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold), #FF8C00);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.logo-text { line-height: 1; }
+.logo-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; color: var(--gold); }
+.logo-sub { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+.nav { padding: 14px 12px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.nav-section { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted2); padding: 10px 8px 5px; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(245,197,24,0.1); color: var(--gold); border: 1px solid rgba(245,197,24,0.2); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; background: var(--gold); border-radius: 0 2px 2px 0;
+}
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; font-family: var(--font-mono); font-size: 9px; background: var(--red); color: white; padding: 2px 6px; border-radius: 99px; font-weight: 700; }
+.coin-widget {
+  margin: 12px;
+  background: linear-gradient(135deg, rgba(245,197,24,0.08), rgba(245,197,24,0.03));
+  border: 1px solid rgba(245,197,24,0.2); border-radius: 10px; padding: 14px;
+}
+.coin-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.coin-amount { font-family: var(--font-display); font-size: 34px; color: var(--gold); line-height: 1.1; margin-top: 2px; }
+.coin-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.coin-track { height: 4px; background: var(--border2); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.coin-fill { height: 100%; width: 68%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 99px; }
+
+/* ═══ MAIN LAYOUT ═══ */
+.main { margin-left: 230px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.25s ease; }
+.topbar {
+  height: 58px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 28px; gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-title { font-family: var(--font-display); font-size: 22px; letter-spacing: 3px; color: var(--text); flex: 1; }
+.content-area { padding: 28px 32px; flex: 1; }
+
+
+/* ═══ MOBILE NAV ═══ */
+.hamburger-btn {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; margin-right: 6px; flex-shrink: 0;
+}
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190;
+}
+@media (max-width: 900px) {
+  .hamburger-btn { display: block; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop.visible { display: block; }
+  .main { margin-left: 0 !important; }
+  .content-area { padding: 20px 16px; }
+  .topbar { padding: 0 14px; gap: 8px; flex-wrap: wrap; height: auto; min-height: 58px; padding-top: 8px; padding-bottom: 8px; }
+  .topbar-title { font-size: 18px; }
+}
+
+@media (max-width: 480px) {
+  .content-area { padding: 16px 10px; }
+  .card-grid { row-gap: 34px; column-gap: 8px; }
+  .card-scene { width: 92px; height: 133px; }
+  .card-scene.legendary-scene { width: 98px; height: 176px; }
+  .card-tier { font-size: 7px; padding: 2px 5px; top: 6px; left: 6px; }
+  .card-coin { font-size: 8px; top: 6px; right: 6px; }
+  .card-name { font-size: 11px; }
+  .card-pos-team { font-size: 7px; }
+  .empty-slot { width: 92px; height: 133px; }
+  .empty-slot-pos { font-size: 13px; }
+  .empty-slot-label { font-size: 7px; }
+  .card-art-batter { top: 22px; bottom: 33px; }
+  .card-art-batter .card-art-fill { filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+  .card-art-pitcher { top: 18px; height: 75px; }
+  .card-art-pitcher .card-art-fill { height: 70px; width: 70px; }
+  .card-divider { top: 92px; left: 6px; right: 6px; }
+  .leg-card-art-mini { min-height: 40px; padding: 2px; }
+  .leg-crown-mini { font-size: 11px; margin-bottom: 1px; }
+  .leg-player-name-mini { font-size: 9px; }
+  .leg-boosts-mini { padding: 2px 6px 5px; gap: 2px; }
+  .leg-boost-row-mini { padding: 2px 4px; }
+  .leg-boost-label-mini, .leg-boost-pts-mini { font-size: 6px; }
+}
+
+/* ── Desktop sidebar collapse (separate from the mobile hamburger) ── */
+.collapse-btn {
+  position: fixed; top: 20px; left: 218px; z-index: 250;
+  width: 22px; height: 40px; border-radius: 0 8px 8px 0;
+  background: var(--surface2); border: 1px solid var(--border); border-left: none;
+  color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: left 0.25s ease, background 0.15s;
+}
+.collapse-btn:hover { background: var(--surface3, #1C2333); color: var(--text); }
+.collapse-btn.collapsed { left: 0; }
+.sidebar.collapsed { transform: translateX(-100%); }
+.main.sidebar-collapsed { margin-left: 0 !important; }
+@media (max-width: 900px) { .collapse-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-diamond">⬦</div>
+    <div class="logo-text">
+      <div class="logo-name">DiamondUT</div>
+      <div class="logo-sub">MLB · SEASON 2026</div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+    <a class="nav-item active" href="roster.html"><span class="nav-icon">🃏</span> My Roster</a>
+    <a class="nav-item" href="auction.html"><span class="nav-icon">🏷️</span> Auction House</a>
+    <a class="nav-item" href="legendary.html"><span class="nav-icon">👑</span> Legendary</a>
+    <div class="nav-section">League</div>
+    <a class="nav-item" href="standings.html"><span class="nav-icon">🏆</span> Standings</a>
+    <a class="nav-item" href="matchup.html"><span class="nav-icon">⚔️</span> Matchup</a>
+    <a class="nav-item" href="history.html"><span class="nav-icon">📜</span> League History</a>
+    <a class="nav-item" href="trade.html"><span class="nav-icon">🔄</span> Trade Center</a>
+    <a class="nav-item" href="injury.html"><span class="nav-icon">🏥</span> Injury Pool</a>
+    <a class="nav-item" href="pack.html"><span class="nav-icon">📦</span> Open Pack</a>
+    <div class="nav-section">Account</div>
+    <a class="nav-item" href="cosmetics.html"><span class="nav-icon">🎨</span> Cosmetics</a>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </div>
+  <div class="coin-widget">
+    <div class="coin-label">Coin Balance</div>
+    <div class="coin-amount" id="coinAmount">—</div>
+    <div class="coin-sub" id="coinSub">Loading...</div>
+    <div class="coin-track"><div class="coin-fill" id="coinFill" style="width:100%"></div></div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileNav()"></div>
+<button class="collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()" title="Collapse sidebar">‹</button>
+
+<main class="main">
+  <div class="topbar">
+    <button class="hamburger-btn" onclick="toggleMobileNav()">☰</button>
+    <div class="topbar-title">My Roster</div>
+    <div class="sport-pill" id="rosterSportBadge" style="font-family:var(--font-mono);font-size:11px;font-weight:700;padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--muted);">MLB</div>
+  </div>
+  <div class="content-area">
+
+<div class="hint-bar" id="hintBar">
+  Tap <span>⇄</span> on any player to select them for a swap, then tap <span>↑</span> on another to complete the swap.
+</div>
+
+<div class="keeper-panel" id="keeperPanel">
+  <div class="keeper-panel-head">
+    <div class="keeper-panel-title">🔒 Keeper Queue — Week <span id="keeperWeek">—</span></div>
+    <button class="keeper-mode-btn" id="keeperModeBtn" onclick="toggleKeeperMode()">Manage Keepers</button>
+  </div>
+  <div class="keeper-panel-sub">
+    Queue up to 2 keeps during the week. Costs (Bronze 50 / Silver 100 / Gold 350) are deducted at the Monday 11:59pm reset. If you can't afford a queued keep at reset, it's cancelled and the player returns to the pool. Platinum and Legendary cards aren't keep-eligible — they stay in circulation for auction, packs, and the weekly legendary draw.
+  </div>
+  <div class="keeper-list" id="keeperList"></div>
+  <div class="keeper-panel-foot">
+    <span class="kf-count" id="keeperCountLabel">0/2 keeps queued</span>
+    <span class="kf-cost" id="keeperCostLabel">0 coins queued</span>
+  </div>
+</div>
+
+<div id="lineupSection">
+  <div class="section-label">LINEUP</div>
+  <div class="card-grid" id="lineupGrid"></div>
+</div>
+
+<div id="benchSection">
+  <div class="section-label">BENCH</div>
+  <div class="card-grid" id="benchGrid"></div>
+</div>
+
+  </div><!-- .content-area -->
+</main>
+
+<script type="module">
+import { supabase } from './supabase.js'
+import { findSkin } from './packskins.js'
+
+window.toggleMobileNav = function() {
+  document.querySelector('.sidebar').classList.toggle('open')
+  document.getElementById('sidebarBackdrop')?.classList.toggle('visible')
+}
+
+// Desktop sidebar collapse — separate from the mobile hamburger above.
+// Persisted so it stays collapsed across page loads/navigation until the
+// user brings it back.
+window.toggleSidebarCollapse = function() {
+  const collapsed = document.querySelector('.sidebar').classList.toggle('collapsed')
+  document.querySelector('.main').classList.toggle('sidebar-collapsed', collapsed)
+  document.getElementById('collapseBtn').classList.toggle('collapsed', collapsed)
+  document.getElementById('collapseBtn').textContent = collapsed ? '\u203a' : '\u2039'
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0')
+}
+
+;(function restoreSidebarCollapse() {
+  if (localStorage.getItem('sidebarCollapsed') !== '1') return
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.sidebar')?.classList.add('collapsed')
+    document.querySelector('.main')?.classList.add('sidebar-collapsed')
+    const btn = document.getElementById('collapseBtn')
+    if (btn) { btn.classList.add('collapsed'); btn.textContent = '\u203a' }
+  })
+})()
+
+
+
+// ── Images (exact base64 from pack.html) ────────────────────────────────────────
+const BATTER_IMG  = 'art/batter.png'
+const PITCHER_IMG = 'art/pitcher.png'
+const QB_IMG = 'art/qb.png'
+const RB_IMG = 'art/rb.png'
+const WR_IMG = 'art/wr.png'
+const TE_IMG = 'art/wr.png'
+const K_IMG = 'art/k.png'
+
+const PITCHER_POS = ['SP','RP','P']
+const TIER_COIN   = {legendary:'👑', platinum:'100', gold:'60', silver:'25', bronze:'10', common:'5'}
+
+let leagueId, teamId, sport
+let equippedSkin = 'classic'
+let teamCoins = 0
+let leagueWeek = 1
+let keeperQueue = []   // [{id, player_id, tier, cost}]
+let keeperMode = false
+const KEEP_COST = { bronze: 50, silver: 100, gold: 350 } // platinum & legendary not keep-eligible
+let allPlayers = []
+let legendaryBoosts = {}  // player_id -> legendary boost data
+// selectedSlot: { slotIndex, section } — which slot the user clicked "swap" on
+let selectedSlot = null
+
+// ── Slot definitions ────────────────────────────────────────────────────────
+// Each slot: { label, eligible[] }
+// eligible is the list of positions that can fill that slot.
+// FLEX (NFL) accepts RB/WR/TE. OF (MLB) accepts OF. Multiple OF slots each need their own player.
+
+const MLB_SLOTS = [
+  { label:'C',   eligible:['C'] },
+  { label:'1B',  eligible:['1B'] },
+  { label:'2B',  eligible:['2B'] },
+  { label:'3B',  eligible:['3B'] },
+  { label:'SS',  eligible:['SS'] },
+  { label:'OF',  eligible:['OF'] },
+  { label:'OF',  eligible:['OF'] },
+  { label:'OF',  eligible:['OF'] },
+  { label:'SP',  eligible:['SP','P'] },
+  { label:'SP',  eligible:['SP','P'] },
+  { label:'SP',  eligible:['SP','P'] },
+  { label:'RP',  eligible:['RP','P'] },
+  { label:'UT',  eligible:['C','1B','2B','3B','SS','OF','DH'] },
+]
+
+const NFL_SLOTS = [
+  { label:'QB',   eligible:['QB'] },
+  { label:'RB',   eligible:['RB'] },
+  { label:'RB',   eligible:['RB'] },
+  { label:'WR',   eligible:['WR'] },
+  { label:'WR',   eligible:['WR'] },
+  { label:'WR',   eligible:['WR'] },
+  { label:'TE',   eligible:['TE'] },
+  { label:'FLEX', eligible:['RB','WR','TE'] },
+  { label:'K',    eligible:['K'] },
+  { label:'DEF',  eligible:['DST','DEF'] },
+]
+
+// Position display order for bench sorting
+const MLB_POS_ORDER = ['C','1B','2B','3B','SS','OF','DH','SP','RP','P']
+const NFL_POS_ORDER = ['QB','RB','WR','TE','K','DST','DEF']
+
+function getSlots() { return sport === 'NFL' ? NFL_SLOTS : MLB_SLOTS }
+function getPosOrder() { return sport === 'NFL' ? NFL_POS_ORDER : MLB_POS_ORDER }
+
+// ── Slot-based matching ──────────────────────────────────────────────────────
+// Returns an array of the same length as slots where each element is either
+// a player object or null (empty slot).  Each active player fills exactly one slot.
+function matchSlotsToPlayers(activePlayers) {
+  const slots = getSlots()
+  const result = new Array(slots.length).fill(null)
+  const used = new Set()
+
+  // First pass: exact match (player's position === slot label, not FLEX/DH)
+  slots.forEach((slot, si) => {
+    if (result[si] !== null) return
+    for (const p of activePlayers) {
+      if (used.has(p.id)) continue
+      if (slot.eligible.includes(p.position) && slot.label === p.position) {
+        result[si] = p
+        used.add(p.id)
+        return
+      }
+    }
+  })
+
+  // Second pass: fill remaining slots with any eligible unused player
+  slots.forEach((slot, si) => {
+    if (result[si] !== null) return
+    for (const p of activePlayers) {
+      if (used.has(p.id)) continue
+      if (slot.eligible.includes(p.position)) {
+        result[si] = p
+        used.add(p.id)
+        return
+      }
+    }
+  })
+
+  return result
+}
+
+// Returns the CSS class that reskins a card's interior background/text
+// to the equipped skin's palette (see the `.skin-X` rules in <style>).
+// Tier border/box-shadow are untouched by that class, so rarity still
+// reads at a glance. Classic (or no skin) adds no class at all.
+function skinClass() {
+  return (equippedSkin && equippedSkin !== 'classic') ? `skin-${equippedSkin}` : ''
+}
+// Which `.fill-X` solid color paints inside the silhouette mask.
+function skinFillClass() {
+  return (equippedSkin && equippedSkin !== 'classic') ? `fill-${equippedSkin}` : 'fill-classic'
+}
+
+// ── Image helpers ────────────────────────────────────────────────────────────
+function getImg(player) {
+  if (sport === 'NFL') {
+    const map = { QB: QB_IMG, RB: RB_IMG, WR: WR_IMG, TE: TE_IMG, K: K_IMG }
+    return map[player.position] || WR_IMG
+  }
+  return PITCHER_POS.includes(player.position) ? PITCHER_IMG : BATTER_IMG
+}
+
+// ── Card & slot builders ─────────────────────────────────────────────────────
+function buildCard(player, slotIndex, section) {
+  const img = getImg(player)
+  const isPitch = sport === 'MLB' && PITCHER_POS.includes(player.position)
+  const artClass = isPitch ? 'card-art-pitcher' : 'card-art-batter'
+  const tier = player.is_keeper ? 'legendary' : (player.tier || 'common')
+  const coin = TIER_COIN[tier] || ''
+
+  const isSelected = selectedSlot && selectedSlot.slotIndex === slotIndex && selectedSlot.section === section
+  const fromClass = isSelected ? ' selected-from' : ''
+
+  let btnHtml = ''
+  if (keeperMode) {
+    if (player.is_keeper) {
+      // Permanent legendary keeper — nothing to toggle
+      btnHtml = ''
+    } else {
+      const q = keeperQueue.find(k => k.player_id === player.id)
+      const cost = KEEP_COST[player.tier]
+      if (q) {
+        btnHtml = `<button class="swap-btn queued-btn" onclick="toggleKeep('${player.id}')">✓ Queued (${q.cost}) — tap to remove</button>`
+      } else if (cost === undefined) {
+        btnHtml = `<button class="swap-btn disabled-btn" disabled>Not keep-eligible</button>`
+      } else {
+        const queuedCost = keeperQueue.reduce((s, k) => s + k.cost, 0)
+        const atMax = keeperQueue.length >= 2
+        const cantAfford = (teamCoins - queuedCost) < cost
+        const disabled = atMax || cantAfford
+        btnHtml = `<button class="swap-btn keep-btn${disabled ? ' disabled-btn' : ''}" ${disabled ? 'disabled' : ''} onclick="toggleKeep('${player.id}')">+ Queue Keep (${cost})</button>`
+      }
+    }
+  } else if (isSelected) {
+    btnHtml = `<button class="swap-btn cancel-btn" onclick="cancelSwap()">&#x2715; cancel</button>`
+  } else if (selectedSlot !== null) {
+    // Only show swap button if the selected player is eligible for this slot
+    const fromPlayer = playerAtSlot(selectedSlot.slotIndex, selectedSlot.section)
+    const slots = getSlots()
+    let canSwap = false
+    if (section === 'bench') {
+      // bench↔bench: always allowed (just reorders bench, no slot eligibility needed)
+      // bench→lineup selected: show swap option
+      canSwap = true
+    } else if (section === 'lineup' && fromPlayer) {
+      // lineup slot: fromPlayer must be eligible for THIS slot
+      const targetSlot = slots[slotIndex]
+      const fromEligible = targetSlot ? targetSlot.eligible.includes(fromPlayer.position) : false
+      // if swapping two lineup players, the target player must also fit the from-slot
+      let toEligible = true
+      if (selectedSlot.section === 'lineup' && player) {
+        const fromSlot = slots[selectedSlot.slotIndex]
+        toEligible = fromSlot ? fromSlot.eligible.includes(player.position) : false
+      }
+      canSwap = fromEligible && toEligible
+    }
+    if (canSwap) {
+      btnHtml = `<button class="swap-btn swap-to-btn" onclick="doSwap(${slotIndex},'${section}')">&#x2191; swap</button>`
+    }
+  } else {
+    btnHtml = `<button class="swap-btn select-btn" onclick="selectSlot(${slotIndex},'${section}')">&#x21c4;</button>`
+  }
+
+  const artContent = (player.position === 'DST' || player.position === 'DEF')
+    ? `<div class="dst-abbrev">${player.team}</div>`
+    : `<div class="card-art-fill ${skinFillClass()}" style="-webkit-mask-image:url(${img});mask-image:url(${img});" role="img" aria-label="${player.name}"></div>`
+
+  if (player.is_keeper) {
+    const leg = legendaryBoosts[player.id]
+    const particles = Array.from({length: 6}, () => {
+      const x   = (Math.random() * 80 - 40).toFixed(0)
+      const dur = (2 + Math.random() * 2).toFixed(1)
+      const del = (Math.random() * 2).toFixed(1)
+      const lft = (10 + Math.random() * 80).toFixed(0)
+      return `<div class="leg-particle" style="left:${lft}%;--x:${x}px;--dur:${dur}s;--delay:${del}s"></div>`
+    }).join('')
+    const boost1 = leg ? `<div class="leg-boost-row-mini"><span class="leg-boost-icon-mini">⚡</span><span class="leg-boost-label-mini">${leg.boost_1_label}</span><span class="leg-boost-pts-mini">+${leg.boost_1_points}pts</span></div>` : ''
+    const boost2 = leg && leg.boost_2_label ? `<div class="leg-boost-row-mini"><span class="leg-boost-icon-mini">${leg.boost_2_dual_fire ? '🔥' : '⚡'}</span><span class="leg-boost-label-mini">${leg.boost_2_label}</span><span class="leg-boost-pts-mini">+${leg.boost_2_points}pts</span>${leg.boost_2_dual_fire ? '<span class="leg-boost-dual-mini">DUAL</span>' : ''}</div>` : ''
+    return `
+    <div class="card-scene${fromClass} legendary-scene" id="scene-${section}-${slotIndex}">
+      <div class="leg-card-mini">
+        <div class="leg-card-border"></div>
+        <div class="leg-particles-mini">${particles}</div>
+        <div class="leg-card-top-mini">
+          <span class="leg-year-badge">${leg?.year || ''}</span>
+          <span class="leg-stamp-mini">LEGENDARY</span>
+        </div>
+        <div class="leg-card-art-mini"><img src="${img}" alt=""></div>
+        <div class="leg-card-info-mini">
+          <div class="leg-crown-mini">👑</div>
+          <div class="leg-player-name-mini">${player.name}</div>
+          <div class="leg-player-meta-mini">
+            <span class="leg-pos-mini">${player.position}</span>
+            <span class="leg-team-mini">${leg?.team || player.team}</span>
+          </div>
+        </div>
+        <div class="leg-boosts-mini">${boost1}${boost2}</div>
+      </div>
+      ${btnHtml}
+    </div>`
+  }
+
+  return `
+  <div class="card-scene${fromClass}" id="scene-${section}-${slotIndex}">
+    <div class="player-card ${tier} ${skinClass()}">
+      <div class="card-rays"></div>
+      <div class="card-glow"></div>
+      <div class="card-shine"></div>
+      <div class="card-tier">${tier.toUpperCase()}</div>
+      <div class="card-coin">${coin}</div>
+      <div class="${artClass}">${artContent}</div>
+      <div class="card-divider"></div>
+      <div class="card-info">
+        <div class="card-name">${player.name}</div>
+        <div class="card-pos-team"><span>${player.position}</span><span>${player.team}</span></div>
+      </div>
+    </div>
+    ${btnHtml}
+  </div>`
+}
+
+function buildEmptySlot(slotLabel, slotIndex, section) {
+  // Show swap-in button if a player is already selected
+  let btnHtml = ''
+  if (selectedSlot !== null) {
+    const fromPlayer = playerAtSlot(selectedSlot.slotIndex, selectedSlot.section)
+    const slots = getSlots()
+    const targetSlot = slots[slotIndex]
+    const canMove = fromPlayer && targetSlot && targetSlot.eligible.includes(fromPlayer.position)
+    if (canMove) {
+      btnHtml = `<button class="swap-btn swap-to-btn" onclick="doSwap(${slotIndex},'${section}')">&#x2191; move here</button>`
+    }
+  }
+  return `
+  <div class="card-scene" id="scene-${section}-${slotIndex}" style="position:relative;">
+    <div class="empty-slot">
+      <div class="empty-slot-pos">${slotLabel}</div>
+      <div class="empty-slot-label">EMPTY</div>
+    </div>
+    ${btnHtml}
+  </div>`
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const slots = getSlots()
+  const posOrder = getPosOrder()
+  const activePlayers = allPlayers.filter(p => p.is_active)
+  const bench = allPlayers.filter(p => !p.is_active)
+
+  // Sort bench by position order
+  bench.sort((a, b) => {
+    const ai = posOrder.indexOf(a.position)
+    const bi = posOrder.indexOf(b.position)
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+  })
+
+  // Sort by projected_points DESC within each position so best player fills first slot
+  const sortedActive = [...activePlayers].sort((a, b) => {
+    const ai = posOrder.indexOf(a.position)
+    const bi = posOrder.indexOf(b.position)
+    if (ai !== bi) return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    return (b.projected_points || 0) - (a.projected_points || 0)
+  })
+  const slotted = matchSlotsToPlayers(sortedActive)
+
+  // ── Lineup grid ──
+  let lineupHtml = ''
+  slots.forEach((slot, si) => {
+    const player = slotted[si]
+    lineupHtml += player
+      ? buildCard(player, si, 'lineup')
+      : buildEmptySlot(slot.label, si, 'lineup')
+  })
+  document.getElementById('lineupGrid').innerHTML = lineupHtml
+
+  // ── Bench grid ──
+  // Bench slots start at index slots.length so indices don't collide with lineup
+  const benchOffset = slots.length
+  let benchHtml = ''
+  if (bench.length === 0) {
+    benchHtml = '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:20px;">No bench players</div>'
+  } else {
+    bench.forEach((p, i) => { benchHtml += buildCard(p, benchOffset + i, 'bench') })
+  }
+  document.getElementById('benchGrid').innerHTML = benchHtml
+  renderKeeperPanel()
+}
+
+// ── Keeper Queue ──────────────────────────────────────────────────────────────
+function toggleKeeperMode() {
+  keeperMode = !keeperMode
+  selectedSlot = null // exit swap-select mode if it was active
+  const btn = document.getElementById('keeperModeBtn')
+  btn.textContent = keeperMode ? 'Done' : 'Manage Keepers'
+  btn.classList.toggle('active', keeperMode)
+  document.getElementById('hintBar').style.display = keeperMode ? 'none' : ''
+  render()
+}
+
+async function toggleKeep(playerId) {
+  const existing = keeperQueue.find(k => k.player_id === playerId)
+  try {
+    if (existing) {
+      await supabase.from('keeper_queue').delete().eq('id', existing.id)
+      keeperQueue = keeperQueue.filter(k => k.id !== existing.id)
+    } else {
+      const player = allPlayers.find(p => p.id === playerId)
+      if (!player) return
+      const cost = KEEP_COST[player.tier]
+      if (cost === undefined) return
+      if (keeperQueue.length >= 2) return
+      const queuedCost = keeperQueue.reduce((s, k) => s + k.cost, 0)
+      if ((teamCoins - queuedCost) < cost) return
+      const { data, error } = await supabase.from('keeper_queue').insert({
+        league_id: leagueId, team_id: teamId, player_id: playerId,
+        tier: player.tier, cost, week_number: leagueWeek, status: 'queued'
+      }).select().single()
+      if (error) { console.error('Queue keep error:', error); return }
+      keeperQueue.push(data)
+    }
+  } catch (err) { console.error('Keeper toggle error:', err) }
+  render()
+}
+
+function renderKeeperPanel() {
+  document.getElementById('keeperWeek').textContent = leagueWeek
+  const queuedCost = keeperQueue.reduce((s, k) => s + k.cost, 0)
+
+  const countEl = document.getElementById('keeperCountLabel')
+  countEl.textContent = `${keeperQueue.length}/2 keeps queued`
+  countEl.classList.toggle('maxed', keeperQueue.length >= 2)
+
+  const costEl = document.getElementById('keeperCostLabel')
+  costEl.textContent = `${queuedCost} / ${teamCoins} coins queued`
+  costEl.classList.toggle('over', queuedCost > teamCoins)
+
+  const listEl = document.getElementById('keeperList')
+  if (keeperQueue.length === 0) {
+    listEl.innerHTML = '<div class="keeper-empty">No keeps queued yet — tap "Manage Keepers" to select up to 2 players from your roster.</div>'
+    return
+  }
+  listEl.innerHTML = keeperQueue.map(k => {
+    const p = allPlayers.find(pl => pl.id === k.player_id)
+    const name = p ? p.name : 'Unknown player'
+    return `<div class="keeper-chip"><span class="kc-name">${name}</span><span class="kc-cost">${k.cost}c</span><button class="kc-remove" onclick="toggleKeep('${k.player_id}')">&#x2715;</button></div>`
+  }).join('')
+}
+
+function updateCoinWidget() {
+  const amt = document.getElementById('coinAmount')
+  const sub = document.getElementById('coinSub')
+  const fill = document.getElementById('coinFill')
+  if (amt) amt.textContent = teamCoins
+  if (sub) sub.textContent = `${teamCoins} coins this week`
+  if (fill) fill.style.width = Math.min((teamCoins / 500) * 100, 100) + '%'
+}
+
+// ── Swap logic ────────────────────────────────────────────────────────────────
+// Resolve a slot index + section to the player sitting in it (or null)
+function playerAtSlot(slotIndex, section) {
+  const slots = getSlots()
+  const activePlayers = allPlayers.filter(p => p.is_active)
+  const bench = allPlayers.filter(p => !p.is_active)
+  bench.sort((a, b) => {
+    const po = getPosOrder()
+    return (po.indexOf(a.position) ?? 99) - (po.indexOf(b.position) ?? 99)
+  })
+
+  if (section === 'lineup') {
+    const po = getPosOrder()
+    const sortedActive = [...activePlayers].sort((a, b) => {
+      const ai = po.indexOf(a.position)
+      const bi = po.indexOf(b.position)
+      if (ai !== bi) return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+      return (b.projected_points || 0) - (a.projected_points || 0)
+    })
+    const slotted = matchSlotsToPlayers(sortedActive)
+    return slotted[slotIndex] || null
+  } else {
+    // bench section: offset by number of lineup slots
+    const benchIdx = slotIndex - slots.length
+    return bench[benchIdx] || null
+  }
+}
+
+window.selectSlot = (slotIndex, section) => {
+  const p = playerAtSlot(slotIndex, section)
+  if (!p) return // can't select an empty slot as source
+  selectedSlot = { slotIndex, section }
+  document.getElementById('hintBar').innerHTML =
+    `<b>${p.name}</b> selected — tap <span style="color:var(--green)">↑ swap</span> on another player or slot, or <span style="color:var(--red)">✕ cancel</span>.`
+  render()
+}
+
+// Keeper functions are defined earlier in this module; inline onclick=""
+// attributes run in global scope, so — same as selectSlot/cancelSwap/doSwap
+// above — they must be explicitly attached to window to be reachable.
+window.toggleKeeperMode = toggleKeeperMode
+window.toggleKeep = toggleKeep
+
+window.cancelSwap = () => {
+  selectedSlot = null
+  document.getElementById('hintBar').innerHTML =
+    `Tap <span style="color:var(--gold)">⇄</span> on any player to select them for a swap, then tap <span style="color:var(--green)">↑</span> on another to complete the swap.`
+  render()
+}
+
+window.doSwap = (targetSlotIndex, targetSection) => {
+  if (!selectedSlot) return
+
+  const slots = getSlots()
+  const fromPlayer = playerAtSlot(selectedSlot.slotIndex, selectedSlot.section)
+  const toPlayer   = playerAtSlot(targetSlotIndex, targetSection)
+
+  if (!fromPlayer) { cancelSwap(); return }
+  if (fromPlayer && toPlayer && fromPlayer.id === toPlayer.id) { cancelSwap(); return }
+
+  // Validate: if moving into a lineup slot, fromPlayer must be eligible for it
+  if (targetSection === 'lineup') {
+    const targetSlot = slots[targetSlotIndex]
+    if (targetSlot && !targetSlot.eligible.includes(fromPlayer.position)) {
+      document.getElementById('hintBar').innerHTML =
+        `<span style="color:var(--red)">✕ ${fromPlayer.name} (${fromPlayer.position}) can't play ${targetSlot.label}</span> — tap <span style="color:var(--gold)">⇄</span> to pick a different player.`
+      selectedSlot = null
+      render()
+      return
+    }
+  }
+
+  // Validate: if toPlayer exists and moves into fromPlayer's lineup slot, toPlayer must be eligible
+  if (selectedSlot.section === 'lineup' && toPlayer) {
+    const fromSlot = slots[selectedSlot.slotIndex]
+    if (fromSlot && !fromSlot.eligible.includes(toPlayer.position)) {
+      document.getElementById('hintBar').innerHTML =
+        `<span style="color:var(--red)">✕ ${toPlayer.name} (${toPlayer.position}) can't play ${fromSlot.label}</span> — tap <span style="color:var(--gold)">⇄</span> to pick a different player.`
+      selectedSlot = null
+      render()
+      return
+    }
+  }
+
+  const fi = allPlayers.findIndex(p => p.id === fromPlayer.id)
+  if (fi === -1) { cancelSwap(); return }
+
+  if (toPlayer) {
+    const ti = allPlayers.findIndex(p => p.id === toPlayer.id)
+    if (ti !== -1) {
+      const tmp = allPlayers[fi].is_active
+      allPlayers[fi].is_active = allPlayers[ti].is_active
+      allPlayers[ti].is_active = tmp
+    }
+  } else {
+    if (selectedSlot.section === 'lineup' && targetSection === 'bench') {
+      allPlayers[fi].is_active = false
+    } else if (selectedSlot.section === 'bench' && targetSection === 'lineup') {
+      allPlayers[fi].is_active = true
+    }
+  }
+
+  selectedSlot = null
+  document.getElementById('hintBar').innerHTML =
+    `Swap complete! Tap <span style="color:var(--gold)">⇄</span> to make another swap.`
+  render()
+  saveRoster()
+}
+
+// ── Persistence ───────────────────────────────────────────────────────────────
+async function saveRoster() {
+  try { sessionStorage.setItem('diamondut_roster', JSON.stringify(allPlayers)); } catch(e) {}
+  try {
+    for (const p of allPlayers) {
+      await supabase.from('rosters').update({ is_active: p.is_active })
+        .eq('team_id', teamId).eq('player_id', p.id)
+    }
+  } catch(err) { console.error('Save error:', err) }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = 'login.html'; return }
+
+  // NOTE: leagueId/teamId/sport live in localStorage everywhere else in the
+  // app (dashboard.html, join-league.html) — this page used to read them
+  // from sessionStorage, which nothing ever wrote to, so leagueId/teamId
+  // silently fell through to the DB-lookup fallback below every time, and
+  // "sport" had no fallback at all, so it always showed MLB regardless of
+  // the league's real sport. Now reading from localStorage like every
+  // other page, and sport is always confirmed against the database anyway.
+  leagueId = localStorage.getItem('activeLeagueId')
+  teamId   = localStorage.getItem('activeTeamId')
+
+  if (!leagueId || !teamId) {
+    const { data: team } = await supabase
+      .from('teams')
+      .select('id, league_id, leagues(mode)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (!team) {
+      document.getElementById('lineupGrid').innerHTML =
+        '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:20px;">No league found. <a href=\'create-league.html\' style=\'color:var(--gold)\'>Create one →</a></div>'
+      return
+    }
+    teamId   = team.id
+    leagueId = team.league_id
+    localStorage.setItem('activeTeamId', teamId)
+    localStorage.setItem('activeLeagueId', leagueId)
+  }
+
+  // ── Team coins + league sport/week (for keeper queue) ────────────────────
+  const { data: teamRow } = await supabase.from('teams').select('coins, equipped_skin').eq('id', teamId).single()
+  teamCoins = teamRow?.coins ?? 0
+  equippedSkin = teamRow?.equipped_skin || 'classic'
+  updateCoinWidget()
+
+  // Sport always comes straight from the league record — it's the single
+  // source of truth, so a stale or missing storage value can never cause
+  // the wrong sport (and wrong card art) to show.
+  const { data: leagueRow } = await supabase.from('leagues').select('week_number, sport').eq('id', leagueId).single()
+  leagueWeek = leagueRow?.week_number || 1
+  sport = leagueRow?.sport || localStorage.getItem('activeSport') || 'MLB'
+  localStorage.setItem('activeSport', sport)
+  document.getElementById('rosterSportBadge').textContent = sport
+
+  const { data: kqRows } = await supabase
+    .from('keeper_queue').select('id, player_id, tier, cost')
+    .eq('team_id', teamId).eq('league_id', leagueId).eq('week_number', leagueWeek).eq('status', 'queued')
+  keeperQueue = kqRows || []
+
+  const { data: rosterRows } = await supabase
+    .from('rosters').select('player_id, is_active, slot, is_keeper')
+    .eq('team_id', teamId).eq('league_id', leagueId)
+
+  if (!rosterRows || rosterRows.length === 0) {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem('diamondut_roster') || 'null')
+      if (cached && cached.length > 0) { allPlayers = cached; render(); return }
+    } catch(e) {}
+    document.getElementById('lineupGrid').innerHTML =
+      '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:20px;">No roster yet — open your starter pack first.</div>'
+    return
+  }
+
+  const playerIds = rosterRows.map(r => r.player_id)
+  const { data: players } = await supabase
+    .from('players').select('id, name, position, team, tier, projected_points, sport')
+    .in('id', playerIds)
+
+  if (!players) return
+
+  allPlayers = players.map(p => {
+    const row = rosterRows.find(r => r.player_id === p.id)
+    return { ...p, is_active: row ? row.is_active : false, slot: row?.slot || p.position, is_keeper: row?.is_keeper || false }
+  })
+
+  // Fetch legendary boost data for any keeper cards on this roster
+  const keeperIds = rosterRows.filter(r => r.is_keeper).map(r => r.player_id)
+  if (keeperIds.length > 0) {
+    const keeperNames = players.filter(p => keeperIds.includes(p.id)).map(p => p.name)
+    const { data: legData } = await supabase
+      .from('legendary_players')
+      .select('player_name, boost_1_label, boost_1_points, boost_2_label, boost_2_points, boost_2_dual_fire, year, team')
+      .eq('owner_team_id', teamId)
+    if (legData) {
+      legData.forEach(leg => {
+        const match = players.find(p => p.name.toLowerCase() === leg.player_name.toLowerCase())
+        if (match) legendaryBoosts[match.id] = leg
+      })
+    }
+  }
+
+  // ── Auto-assign is_active using slot matching ──────────────────────────────
+  // If all players are active (fresh pack / bad DB state) OR active count
+  // exceeds available lineup slots, re-derive from scratch so the best-fit
+  // players fill lineup slots and everyone else goes to bench.
+  const slots = getSlots()
+  const currentActive = allPlayers.filter(p => p.is_active)
+  const needsRebalance =
+    currentActive.length === 0 ||                      // nothing active
+    currentActive.length === allPlayers.length ||       // everything active (no bench)
+    currentActive.length > slots.length                 // more active than slots exist
+
+  if (needsRebalance) {
+    // Sort players so those with a single exact-match slot come first,
+    // then multi-eligible (FLEX/UT/DH) players — prevents flexible slots
+    // from stealing players away from their dedicated slot. Within players
+    // that are otherwise tied, higher-tier cards go first so a Gold WR
+    // claims a starting slot ahead of a Bronze WR instead of it coming
+    // down to whatever order they happened to load in.
+    const slots = getSlots()
+    const posOrder = getPosOrder()
+    const slotCountFor = (pos) =>
+      slots.filter(s => s.eligible.includes(pos)).length
+    const TIER_RANK = { legendary: 5, platinum: 4, gold: 3, silver: 2, bronze: 1 }
+    const tierRankOf = (p) => TIER_RANK[(p.tier || '').toLowerCase()] || 0
+    const sorted = [...allPlayers].sort((a, b) => {
+      const aSlots = slotCountFor(a.position)
+      const bSlots = slotCountFor(b.position)
+      if (aSlots !== bSlots) return aSlots - bSlots // fewer eligible slots → go first
+      const aTier = tierRankOf(a), bTier = tierRankOf(b)
+      if (aTier !== bTier) return bTier - aTier // higher tier → goes first, claims the slot
+      const ai = posOrder.indexOf(a.position)
+      const bi = posOrder.indexOf(b.position)
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    })
+
+    // Run slot matching treating all players as candidates
+    const slotted = matchSlotsToPlayers(sorted)
+    const activeIds = new Set(slotted.filter(Boolean).map(p => p.id))
+
+    // Players that fill a slot → active; rest → bench
+    allPlayers.forEach(p => { p.is_active = activeIds.has(p.id) })
+
+    // Persist corrected values back to Supabase silently
+    saveRoster()
+  }
+
+  render()
+}
+
+init()
+</script>
+</body>
+</html>
