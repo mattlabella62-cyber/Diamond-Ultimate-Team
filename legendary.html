@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diamond Cut Fantasy — Legendary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap');
+  :root {
+    /* Repainted to match the rest of the app's current look (same
+    palette/fonts as standings.html, dashboard.html, etc.) — this page
+    was still on the old, plainer template. */
+    --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+    --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    --bg:#060810;--surface:#0F1218;--surface2:#151B25;--border:#1E2535;
+    --accent:#F5C518;--accent2:#FFE066;--red:#E8433B;--green:#27C96A;
+    --blue:#3B8BF5;--text:#E8ECF4;--muted:#5A6A82;--sidebar-w:230px;
+    --leg-gold:#ffd700;--leg-amber:#F5C518;
+    --gold-bg:#2d2000;--gold-clr:#f5c842;--plat-bg:#1a1040;--plat-clr:#b48aff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
+
+  /* ── SIDEBAR ── */
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+  .sidebar-logo{padding:16px 14px 12px;border-bottom:1px solid var(--border)}
+  .logo-diamond{width:28px;height:28px;background:var(--accent);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);display:inline-block;vertical-align:middle;margin-right:6px}
+  .logo-text{font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:1px;color:var(--accent);vertical-align:middle}
+  .logo-sub{font-family:var(--font-mono);display:block;font-size:9px;color:var(--muted);letter-spacing:.5px;margin-top:2px;padding-left:34px}
+  .sidebar-section{padding:14px 10px 4px}
+  .sidebar-section-label{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:0 4px 6px}
+  .sidebar-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;color:var(--muted);font-size:12px;font-weight:500;text-decoration:none;cursor:pointer;transition:background 0.15s,color 0.15s;margin-bottom:1px}
+  .sidebar-link:hover{background:var(--surface2);color:var(--text)}
+  .sidebar-link.active{background:rgba(245,166,35,0.12);color:var(--accent)}
+  .sidebar-link .icon{font-size:14px;width:18px;text-align:center}
+  .sidebar-bottom{margin-top:auto;padding:12px 10px;border-top:1px solid var(--border)}
+  .coin-box{background:var(--surface2);border-radius:8px;padding:10px 12px}
+  .coin-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  .coin-value{font-size:20px;font-weight:900;color:var(--accent);line-height:1.1}
+  .coin-sub{font-size:9px;color:var(--muted);margin-top:2px}
+
+  /* ── MAIN ── */
+  .main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left 0.25s ease}
+
+  /* ── Desktop sidebar collapse (separate from the mobile hamburger) ── */
+  .sidebar { transition: transform 0.25s ease; }
+  .sidebar.collapsed { transform: translateX(-100%); }
+  .main.sidebar-collapsed { margin-left: 0 !important; }
+  .collapse-btn {
+    position: fixed; top: 20px; left: 218px; z-index: 250;
+    width: 22px; height: 40px; border-radius: 0 8px 8px 0;
+    background: var(--surface2); border: 1px solid var(--border); border-left: none;
+    color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: left 0.25s ease, background 0.15s;
+  }
+  .collapse-btn:hover { background: var(--surface3, #1C2333); color: var(--text); }
+  .collapse-btn.collapsed { left: 0; }
+  @media (max-width: 900px) { .collapse-btn { display: none; } }
+  .topbar{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface)}
+  .topbar h1{font-family:var(--font-display);font-size:24px;font-weight:400;letter-spacing:2px;color:var(--text)}
+  .topbar h1 span{color:var(--leg-gold)}
+  .week-badge{font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;color:var(--muted)}
+  .sport-badge{font-family:var(--font-mono);background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.4);border-radius:20px;font-size:10px;font-weight:800;padding:4px 10px;color:var(--accent)}
+  .avatar{font-family:var(--font-display);width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--red));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;margin-left:auto}
+
+  /* ── INFO BAR ── */
+  .info-bar{display:flex;align-items:center;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+  .info-item{display:flex;flex-direction:column;gap:2px;padding:0 16px}
+  .info-item:first-child{padding-left:0}
+  .info-sep{width:1px;height:28px;background:var(--border)}
+  .info-label{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+  .info-value{font-family:var(--font-display);font-size:19px;font-weight:400;color:var(--text)}
+  .info-value.gold{color:var(--leg-gold)}
+
+  /* ── CONTENT ── */
+  .content{padding:24px;flex:1;max-width:900px;margin:0 auto;width:100%}
+
+  /* ── FEATURED CARD ── */
+  .featured-section{display:flex;flex-direction:column;align-items:center;margin-bottom:32px}
+  .featured-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--leg-gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .featured-label::before,.featured-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.3))}
+  .featured-label::after{background:linear-gradient(90deg,rgba(255,215,0,0.3),transparent)}
+
+  /* the card itself */
+  .leg-card{
+    position:relative;border-radius:16px;overflow:hidden;
+    background:linear-gradient(160deg,#1a1200 0%,#0d0f14 50%,#1a0800 100%);
+    border:1px solid rgba(255,215,0,0.25);
+    width:240px;
+    display:flex;flex-direction:column;
+  }
+  .leg-card.available .leg-card-border{animation:borderPulse 2s ease-in-out infinite}
+  .leg-card-border{position:absolute;inset:0;border-radius:16px;pointer-events:none;border:2px solid rgba(255,215,0,0.6);z-index:10}
+  .leg-card::before{
+    content:'';position:absolute;inset:0;border-radius:16px;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,215,0,0.08) 50%,transparent 60%);
+    background-size:200% 100%;animation:shine 3s ease-in-out infinite;
+    z-index:5;pointer-events:none;
+  }
+  .leg-card.claimed::before{animation:none}
+  .leg-card.claimed{opacity:0.45;filter:grayscale(0.7);border-color:rgba(255,215,0,0.12)}
+  .leg-card.claimed .leg-card-border{border-color:rgba(255,255,255,0.08)}
+  .leg-card.claimed .leg-silhouette{filter:grayscale(1) brightness(0.6)}
+  .claimed-week-msg{margin-top:10px;font-size:11px;color:var(--muted);text-align:center;letter-spacing:.5px}
+  @keyframes shine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  @keyframes borderPulse{
+    0%,100%{border-color:rgba(255,215,0,0.4);box-shadow:0 0 8px rgba(255,215,0,0.1)}
+    50%{border-color:rgba(255,215,0,0.9);box-shadow:0 0 20px rgba(255,215,0,0.4)}
+  }
+  .leg-particles{position:absolute;inset:0;pointer-events:none;z-index:4;overflow:hidden}
+  .particle{position:absolute;width:2px;height:2px;background:var(--leg-gold);border-radius:50%;animation:float var(--dur,3s) var(--delay,0s) ease-in-out infinite}
+  @keyframes float{
+    0%{transform:translateY(100%) translateX(var(--x,0px));opacity:0}
+    20%{opacity:0.8}80%{opacity:0.4}
+    100%{transform:translateY(-20px) translateX(var(--x,0px));opacity:0}
+  }
+
+  .leg-card-top{padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between;z-index:6;position:relative}
+  .year-badge{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);border-radius:6px;font-size:9px;font-weight:800;letter-spacing:1px;padding:3px 7px;color:var(--leg-gold)}
+  .leg-stamp{font-size:8px;font-weight:900;letter-spacing:2px;color:rgba(255,215,0,0.5);text-transform:uppercase}
+
+  .leg-card-art{height:200px;display:flex;align-items:center;justify-content:center;position:relative;z-index:6;padding:8px}
+  .leg-silhouette{width:70%;height:auto;filter:drop-shadow(0 0 20px rgba(255,215,0,0.5)) sepia(1) saturate(3) hue-rotate(5deg) brightness(1.2)}
+
+  .leg-card-info{padding:8px 14px 6px;z-index:6;position:relative;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent)}
+  .leg-crown{font-size:18px;text-align:center;margin-bottom:2px}
+  .leg-player-name{font-size:15px;font-weight:900;color:var(--text);letter-spacing:.3px;text-transform:uppercase}
+  .leg-player-meta{display:flex;align-items:center;gap:6px;margin-top:3px}
+  .leg-pos{font-size:9px;font-weight:800;color:var(--leg-gold);background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);border-radius:3px;padding:2px 6px}
+  .leg-team{font-size:9px;color:var(--muted);font-weight:600}
+
+  .leg-boosts{padding:6px 14px 10px;z-index:6;position:relative;display:flex;flex-direction:column;gap:4px}
+  .boost-row{display:flex;align-items:center;gap:5px;background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.12);border-radius:5px;padding:5px 8px}
+  .boost-icon{font-size:10px}
+  .boost-label{font-size:9px;font-weight:600;color:rgba(255,215,0,0.8);flex:1}
+  .boost-pts{font-size:9px;font-weight:800;color:var(--leg-gold)}
+  .boost-dual{font-size:8px;color:var(--green);font-weight:700;margin-left:2px}
+
+  .leg-card-footer{padding:0 14px 12px;z-index:6;position:relative}
+  .claim-btn{width:100%;background:linear-gradient(135deg,#7c5500,#f5a623);border:none;border-radius:8px;color:#000;font-size:11px;font-weight:900;letter-spacing:.5px;padding:9px;cursor:pointer;text-transform:uppercase;transition:opacity 0.2s}
+  .claim-btn:hover{opacity:0.85}
+  .claimed-footer{text-align:center;font-size:10px;color:var(--muted);font-weight:600;padding-bottom:4px}
+
+  /* ── SACRIFICE SECTION ── */
+  .sacrifice-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .sacrifice-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+  .sacrifice-title{font-size:13px;font-weight:700;color:var(--text)}
+  .sacrifice-counter{display:flex;align-items:baseline;gap:4px}
+  .sacrifice-val{font-size:22px;font-weight:900;color:var(--leg-gold)}
+  .sacrifice-sep{font-size:14px;color:var(--muted)}
+  .sacrifice-goal{font-size:14px;font-weight:700;color:var(--muted)}
+  .sacrifice-label{font-size:10px;color:var(--muted);margin-left:4px}
+
+  .sacrifice-progress{height:3px;background:var(--border)}
+  .sacrifice-progress-fill{height:100%;background:linear-gradient(90deg,#7c5500,#ffd700);transition:width 0.3s}
+
+  .void-warning{margin:14px 20px 0;background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--red);line-height:1.5}
+  .void-warning strong{display:block;margin-bottom:2px}
+
+  .roster-trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:14px 20px 4px;max-height:300px;overflow-y:auto}
+  .trade-player-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;transition:border-color 0.15s,background 0.15s}
+  .trade-player-card:hover{border-color:var(--accent);background:rgba(245,166,35,0.05)}
+  .trade-player-card.selected{border-color:var(--leg-gold);background:rgba(255,215,0,0.08)}
+  .trade-player-card.selected .trade-check{display:flex}
+  .trade-player-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.2}
+  .trade-player-meta{display:flex;align-items:center;gap:4px;margin-top:4px}
+  .trade-pos{font-size:8px;font-weight:700;color:var(--accent);background:rgba(245,166,35,0.1);border-radius:3px;padding:1px 4px}
+  .trade-tier{font-size:8px;font-weight:700;border-radius:3px;padding:1px 5px}
+  .trade-tier.bronze{background:#2d1a00;color:#cd7f32}
+  .trade-tier.silver{background:#1a1a1a;color:#c0c0c0}
+  .trade-tier.gold{background:var(--gold-bg);color:var(--gold-clr)}
+  .trade-tier.platinum{background:var(--plat-bg);color:var(--plat-clr)}
+  .trade-value{font-size:10px;font-weight:800;color:var(--leg-gold);margin-left:auto}
+  .trade-check{display:none;width:14px;height:14px;background:var(--leg-gold);border-radius:50%;align-items:center;justify-content:center;font-size:8px;color:#000;font-weight:900;margin-left:auto;flex-shrink:0}
+
+  .sacrifice-actions{padding:14px 20px 16px;display:flex;justify-content:flex-end}
+  .btn-confirm-claim{background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:8px;color:rgba(255,215,0,0.5);font-size:12px;font-weight:900;padding:10px 24px;cursor:not-allowed;letter-spacing:.5px;text-transform:uppercase;transition:all 0.2s;pointer-events:none}
+  .btn-confirm-claim.ready{background:linear-gradient(135deg,#7c5500,#f5a623);border-color:transparent;color:#000;cursor:pointer;pointer-events:auto}
+  .btn-confirm-claim.ready:hover{filter:brightness(1.1)}
+
+  /* ── LOADING / EMPTY ── */
+  .empty-state{text-align:center;padding:40px;color:var(--muted)}
+  .empty-icon{font-size:32px;margin-bottom:10px}
+  .spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:320px}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-color:var(--green);color:var(--green)}
+  .toast.error{border-color:var(--red);color:var(--red)}
+
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ═══ MOBILE NAV ═══ */
+.hamburger-btn {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; margin-right: 6px; flex-shrink: 0;
+}
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190;
+}
+@media (max-width: 900px) {
+  .hamburger-btn { display: block; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop.visible { display: block; }
+  .main { margin-left: 0 !important; }
+  .topbar { padding: 12px 14px; gap: 8px; }
+  .topbar h1 { flex: 1; min-width: 0; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .info-bar { padding: 10px 14px; }
+  .sacrifice-header { flex-wrap: wrap; gap: 8px; padding: 14px 16px 10px; }
+  .roster-trade-grid { padding: 12px 14px 4px; }
+  .sacrifice-actions { padding: 12px 14px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-diamond"></div>
+    <span class="logo-text">DIAMOND CUT</span>
+    <span class="logo-sub" id="leagueSubEl">MLB · SEASON 2025</span>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Main</div>
+    <a href="dashboard.html" class="sidebar-link"><span class="icon">⚡</span> Dashboard</a>
+    <a href="roster.html"    class="sidebar-link"><span class="icon">👤</span> My Roster</a>
+    <a href="auction.html"   class="sidebar-link"><span class="icon">🏷️</span> Auction House</a>
+    <a href="legendary.html" class="sidebar-link active"><span class="icon">👑</span> Legendary</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">League</div>
+    <a href="standings.html" class="sidebar-link"><span class="icon">🏆</span> Standings</a>
+    <a href="matchup.html" class="sidebar-link"><span class="icon">⚔️</span> Matchup</a>
+    <a href="history.html" class="sidebar-link"><span class="icon">📜</span> League History</a>
+    <a href="trade.html" class="sidebar-link"><span class="icon">🔄</span> Trade Center</a>
+    <a href="injury.html" class="sidebar-link"><span class="icon">🩹</span> Injury Pool</a>
+    <a href="pack.html"   class="sidebar-link"><span class="icon">📦</span> Open Pack</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Account</div>
+    <a href="cosmetics.html" class="sidebar-link"><span class="icon">🎨</span> Cosmetics</a>
+    <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="coin-box">
+      <div class="coin-label">Coin Balance</div>
+      <div class="coin-value" id="coinsEl">—</div>
+      <div class="coin-sub">Trade-in required: 100</div>
+    </div>
+  </div>
+</nav>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileNav()"></div>
+<button class="collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()" title="Collapse sidebar">‹</button>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="hamburger-btn" onclick="toggleMobileNav()">☰</button>
+    <h1>Legendary <span>Cards</span></h1>
+    <span class="week-badge" id="weekBadge">WEEK — OF —</span>
+    <span class="sport-badge" id="sportBadge">MLB</span>
+    <div class="avatar" id="avatarEl">?</div>
+  </div>
+  <div class="info-bar">
+    <div class="info-item">
+      <span class="info-label">This Week</span>
+      <span class="info-value gold" id="featuredNameEl">—</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <span class="info-label">Status</span>
+      <span class="info-value gold" id="statusEl">—</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <span class="info-label">Trade-In Required</span>
+      <span class="info-value gold">100+ Value</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- FEATURED CARD CENTERED -->
+    <div class="featured-section" id="featuredSection">
+      <div class="spinner"></div>
+      <p style="color:var(--muted);text-align:center;margin-top:10px">Loading legendary card...</p>
+    </div>
+
+    <!-- ROSTER SACRIFICE (always visible below the card) -->
+    <div class="sacrifice-section" id="sacrificeSection">
+      <div class="sacrifice-header">
+        <span class="sacrifice-title">⚔️ Select Players to Sacrifice</span>
+        <div class="sacrifice-counter">
+          <span class="sacrifice-val" id="tradeValEl">0</span>
+          <span class="sacrifice-sep">/</span>
+          <span class="sacrifice-goal">100</span>
+          <span class="sacrifice-label">trade value</span>
+        </div>
+      </div>
+      <div class="sacrifice-progress">
+        <div class="sacrifice-progress-fill" id="tradeProgressFill" style="width:0%"></div>
+      </div>
+      <div class="void-warning">
+        <strong>⚠️ Void Warning</strong>
+        Players you sacrifice are removed from your roster and voided for 1 week. This cannot be undone.
+      </div>
+      <div class="roster-trade-grid" id="rosterTradeGrid">
+        <div class="empty-state"><p>Loading roster...</p></div>
+      </div>
+      <div class="sacrifice-actions">
+        <button class="btn-confirm-claim" id="btnConfirmClaim" onclick="confirmLegendaryClaim()">⚔️ Sacrifice &amp; Claim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { supabase } from './supabase.js'
+  import { findAvatar } from './avatars.js'
+
+window.toggleMobileNav = function() {
+  document.querySelector('.sidebar').classList.toggle('open')
+  document.getElementById('sidebarBackdrop')?.classList.toggle('visible')
+}
+
+// Desktop sidebar collapse — separate from the mobile hamburger above.
+// Persisted so it stays collapsed across page loads/navigation until the
+// user brings it back.
+window.toggleSidebarCollapse = function() {
+  const collapsed = document.querySelector('.sidebar').classList.toggle('collapsed')
+  document.querySelector('.main').classList.toggle('sidebar-collapsed', collapsed)
+  document.getElementById('collapseBtn').classList.toggle('collapsed', collapsed)
+  document.getElementById('collapseBtn').textContent = collapsed ? '›' : '‹'
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0')
+}
+
+// Restore saved collapse state immediately (before anything else renders)
+// so there's no flash of the sidebar expanding then collapsing.
+;(function restoreSidebarCollapse() {
+  if (localStorage.getItem('sidebarCollapsed') !== '1') return
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.sidebar')?.classList.add('collapsed')
+    document.querySelector('.main')?.classList.add('sidebar-collapsed')
+    const btn = document.getElementById('collapseBtn')
+    if (btn) { btn.classList.add('collapsed'); btn.textContent = '›' }
+  })
+})()
+
+
+  // ── SILHOUETTE IMAGES ──
+  // Loaded from pack.html base64 vars — we define them inline here
+const BATTER_IMG  = 'art/batter.png'
+const PITCHER_IMG = 'art/pitcher.png'
+const QB_IMG = 'art/qb.png'
+const RB_IMG = 'art/rb.png'
+const WR_IMG = 'art/wr.png'
+const TE_IMG = 'art/wr.png'
+const K_IMG = 'art/k.png'
+
+
+  const TIER_VALUE = { bronze: 10, silver: 25, gold: 60, platinum: 100 }
+  const CLAIM_THRESHOLD = 100  // trade value needed to claim a legendary
+
+  let currentTeam   = null
+  let myRoster      = []
+  let featuredCard  = null
+  let selectedPlayers = new Set()
+  let currentSport  = 'MLB'
+
+  // ── SILHOUETTE PICKER ──
+  function getSilhouette(sport, position) {
+    if (sport === 'NFL' || sport === 'nfl') {
+      const map = { QB: QB_IMG, RB: RB_IMG, WR: WR_IMG, TE: TE_IMG, K: K_IMG }
+      return map[position] || WR_IMG
+    }
+    const pitcherPos = ['SP','RP','P','SP/DH']
+    return pitcherPos.includes(position) ? PITCHER_IMG : BATTER_IMG
+  }
+
+  // ── AUTO-ROTATION (per-league, using league_id as seed offset) ──
+  function getCurrentWeek() {
+    // Use league week number — keeps legendary, auction, and pack in sync.
+    // (Was sessionStorage, which nothing else in the app writes to — every
+    // other page uses localStorage — so this always silently fell back to
+    // week 1.)
+    return parseInt(localStorage.getItem('activeLeagueWeek') || '1') - 1
+  }
+
+  // Simple hash of league_id string so each league gets a different card
+  function leagueOffset(leagueId) {
+    if (!leagueId) return 0
+    let h = 0
+    for (let i = 0; i < leagueId.length; i++) h = (h * 31 + leagueId.charCodeAt(i)) >>> 0
+    return h
+  }
+
+  async function syncLegendaryActiveFlag(featured, previous) {
+    if (previous) {
+      await supabase.from('players').update({ is_legendary_active: false })
+        .eq('name', previous.player_name).eq('sport', previous.sport)
+    }
+    if (featured && !featured.is_claimed) {
+      await supabase.from('players').update({ is_legendary_active: true })
+        .eq('name', featured.player_name).eq('sport', featured.sport)
+    }
+  }
+
+  // ── INIT ──
+  async function init() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { document.body.innerHTML = '<div style="padding:40px;color:#f5a623">Please log in first.</div>'; return }
+
+    // NOTE: this used to read from sessionStorage, which nothing else in
+    // the app writes to (dashboard.html, join-league.html, etc. all use
+    // localStorage) — so teamId here was always empty, currentTeam never
+    // got set, and sport always silently fell back to MLB (which also
+    // broke the featured-card query below, since it filters by sport).
+    const teamId = localStorage.getItem('activeTeamId')
+
+    if (teamId) {
+      const { data: team } = await supabase.from('teams').select('*').eq('id', teamId).single()
+      currentTeam = team
+
+      // Load league week + sport so everything stays in sync with auction +
+      // pack, and pulls the correct sport's legendary card. Sport always
+      // comes straight from the league record — the single source of
+      // truth — instead of a cached value that can go stale.
+      if (team?.league_id) {
+        const { data: league } = await supabase.from('leagues').select('week_number, sport').eq('id', team.league_id).single()
+        if (league) {
+          localStorage.setItem('activeLeagueWeek', String(league.week_number || 1))
+          currentSport = league.sport || localStorage.getItem('activeSport') || 'MLB'
+          localStorage.setItem('activeSport', currentSport)
+        }
+      }
+    }
+    if (currentSport === 'MLB' && !currentTeam) {
+      // No team resolved at all — last resort so the badge isn't just blank
+      currentSport = localStorage.getItem('activeSport') || 'MLB'
+    }
+
+    document.getElementById('sportBadge').textContent = currentSport
+    const leagueSub = document.getElementById('leagueSubEl')
+    if (leagueSub) leagueSub.textContent = `${currentSport} · SEASON 2026`
+    {
+      const av = findAvatar(currentTeam?.avatar_id)
+      const avatarEl = document.getElementById('avatarEl')
+      if (av) { avatarEl.textContent = av.emoji; avatarEl.style.background = av.color }
+      else { avatarEl.textContent = (currentTeam?.team_name || currentTeam?.name || user.email || '?')[0].toUpperCase(); avatarEl.style.background = '' }
+    }
+    document.getElementById('coinsEl').textContent    = currentTeam?.coins ?? 0
+
+    // Load both in parallel, then render roster immediately
+    await Promise.all([loadFeaturedCard(), loadMyRoster()])
+    // Show sacrifice section only when the featured card is unclaimed
+    const isClaimedThisWeek = featuredCard && featuredCard.is_claimed
+    document.getElementById('sacrificeSection').style.display = isClaimedThisWeek ? 'none' : 'block'
+    if (!isClaimedThisWeek) { renderRosterForTrade(); updateTradeCounter() }
+  }
+
+  // ── LOAD FEATURED CARD ──
+  async function loadFeaturedCard(pinnedClaimedId = null) {
+    // Use the sport already resolved from the database in init() rather than
+    // re-reading storage — keeps this in sync with what's actually shown.
+    const sport    = currentSport
+    const leagueId = currentTeam?.league_id || localStorage.getItem('activeLeagueId') || ''
+
+    const week = getCurrentWeek()
+
+    // Check if this league has a pre-reserved legendary card for this week
+    const { data: reserved } = await supabase
+      .from('league_legendary')
+      .select('*, legendary_players(*)')
+      .eq('league_id', leagueId)
+      .eq('week_number', week + 1)
+      .maybeSingle()
+
+    if (reserved?.legendary_players) {
+      featuredCard = reserved.legendary_players
+      document.getElementById('weekBadge').textContent = `WEEK ${week + 1}`
+      document.getElementById('featuredNameEl').textContent = featuredCard.player_name
+      document.getElementById('statusEl').textContent = featuredCard.is_claimed ? 'CLAIMED' : 'AVAILABLE'
+      renderFeaturedCard()
+      return
+    }
+
+    // Fallback: pick from available cards excluding rostered players
+    const { data, error } = await supabase
+      .from('legendary_players').select('*')
+      .eq('sport', sport).eq('is_active', true)
+      .order('year', { ascending: true })
+      .order('player_name', { ascending: true })
+
+    if (error) { console.error(error); return }
+
+    const { data: rosteredNow } = await supabase.from('rosters').select('player_id').eq('league_id', leagueId)
+    const rosteredIds = new Set((rosteredNow || []).map(r => r.player_id).filter(Boolean))
+    const allCards = (data || []).filter(c => !rosteredIds.has(c.player_id))
+
+    if (allCards.length > 0) {
+      const unclaimed = allCards.filter(c => !c.is_claimed)
+      const offset    = leagueOffset(leagueId)
+
+      if (pinnedClaimedId) {
+        // Just claimed this card — keep showing it grayed out for this session
+        featuredCard = allCards.find(c => c.id === pinnedClaimedId) || null
+      } else if (unclaimed.length > 0) {
+        // Each league gets a different unclaimed card based on week + league offset
+        const idx    = (week + offset) % unclaimed.length
+        featuredCard = unclaimed[idx]
+
+        // Reserve this card for the league so auction/pack can exclude the player
+        if (leagueId && featuredCard) {
+          await supabase.from('league_legendary').upsert({
+            league_id:           leagueId,
+            week_number:         week + 1,
+            legendary_player_id: featuredCard.id,
+            player_id:           featuredCard.player_id || null,
+            reserved_at:         new Date().toISOString()
+          })
+        }
+
+        // Sync active flag for this unclaimed card
+        const prevIdx = ((week + offset - 1) % unclaimed.length + unclaimed.length) % unclaimed.length
+        const prev    = unclaimed[prevIdx] !== featuredCard ? unclaimed[prevIdx] : null
+        await syncLegendaryActiveFlag(featuredCard, prev)
+      } else {
+        // All cards claimed — find the one claimed by this team (if any)
+        const ours = allCards.find(c => c.owner_team_id === currentTeam?.id)
+        featuredCard = ours || allCards[allCards.length - 1]
+      }
+    } else {
+      featuredCard = null
+    }
+
+    document.getElementById('weekBadge').textContent      = `WEEK ${week + 1}`
+    document.getElementById('featuredNameEl').textContent = featuredCard ? featuredCard.player_name : 'None Available'
+    document.getElementById('statusEl').textContent       = featuredCard
+      ? (featuredCard.is_claimed ? 'CLAIMED' : 'AVAILABLE')
+      : '—'
+
+    renderFeaturedCard()
+  }
+
+  // ── RENDER FEATURED CARD ──
+  function renderFeaturedCard() {
+    const sec = document.getElementById('featuredSection')
+
+    if (!featuredCard) {
+      sec.innerHTML = `<div class="empty-state"><div class="empty-icon">👑</div><p>No legendary card available this week.</p></div>`
+      return
+    }
+
+    const c = featuredCard
+    const claimed = c.is_claimed
+    const ownedByMe = c.owner_team_id === currentTeam?.id
+    const dualFire  = c.boost_2_dual_fire
+    const img = getSilhouette(c.sport, c.position)
+
+    const boost1 = `<div class="boost-row">
+      <span class="boost-icon">⚡</span>
+      <span class="boost-label">${c.boost_1_label}</span>
+      <span class="boost-pts">+${c.boost_1_points}pts</span>
+    </div>`
+    const boost2 = c.boost_2_label ? `<div class="boost-row">
+      <span class="boost-icon">${dualFire?'🔥':'⚡'}</span>
+      <span class="boost-label">${c.boost_2_label}</span>
+      <span class="boost-pts">+${c.boost_2_points}pts</span>
+      ${dualFire?'<span class="boost-dual">DUAL</span>':''}
+    </div>` : ''
+
+    const footer = claimed
+      ? `<div class="claimed-footer">${ownedByMe ? '✅ You own this card' : '🔒 Already claimed'}</div>`
+      : `<button class="claim-btn" onclick="openSacrifice()">⚔️ Sacrifice to Claim</button>`
+
+    const particles = claimed ? '' : Array.from({length:8}, (_,i) => {
+      const x   = (Math.random()*120-60).toFixed(0)
+      const dur = (2+Math.random()*2).toFixed(1)
+      const del = (Math.random()*2).toFixed(1)
+      const lft = (10+Math.random()*80).toFixed(0)
+      return `<div class="particle" style="left:${lft}%;--x:${x}px;--dur:${dur}s;--delay:${del}s"></div>`
+    }).join('')
+
+    // Time remaining
+    const msInWeek = 7 * 24 * 60 * 60 * 1000
+    const SEASON_START = new Date('2025-09-04')
+    const elapsed = (new Date() - SEASON_START) % msInWeek
+    const remaining = msInWeek - elapsed
+    const daysLeft  = Math.floor(remaining / (24 * 60 * 60 * 1000))
+    const hoursLeft = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000))
+    const timeLeft  = claimed ? '' : `${daysLeft}D ${hoursLeft}H LEFT`
+
+    const statusBadge = claimed
+      ? (ownedByMe ? '👑 YOU OWN THIS' : '🔒 CLAIMED')
+      : '⬦ LEGENDARY CARD AVAILABLE'
+
+    sec.innerHTML = `
+      <div class="featured-label">${statusBadge}</div>
+      ${claimed ? '<div class="claimed-week-msg">🔒 This card was claimed — a new card rotates in next week</div>' : ''}
+      <div class="leg-card ${claimed?'claimed':'available'}">
+        <div class="leg-card-border"></div>
+        <div class="leg-particles">${particles}</div>
+        <div class="leg-card-top">
+          <span class="year-badge">${c.year}</span>
+          <span class="leg-stamp">${timeLeft}</span>
+        </div>
+        <div class="leg-card-art" style="position:relative;height:200px;display:flex;align-items:center;justify-content:center;">
+          <img class="leg-silhouette" src="${img}" alt="${c.position}" style="height:180px;width:auto;filter:drop-shadow(0 0 24px rgba(255,160,0,0.9));">
+        </div>
+        <div class="leg-card-info">
+          <div class="leg-crown">👑</div>
+          <div class="leg-player-name">${c.player_name}</div>
+          <div class="leg-player-meta">
+            <span class="leg-pos">${c.position}</span>
+            <span class="leg-team">${c.team} · ${c.year}</span>
+          </div>
+        </div>
+        <div class="leg-boosts">${boost1}${boost2}</div>
+        <div style="padding:10px 16px;font-family:var(--font-mono);font-size:10px;color:var(--muted);border-top:1px solid rgba(255,200,0,0.15);line-height:1.5">
+          <strong style="color:var(--accent)">Trade-In Required:</strong> Sacrifice cards totaling <strong>100+ coin value</strong> from your roster to claim.
+        </div>
+        <div class="leg-card-footer">${footer}</div>
+      </div>`
+  }
+
+  // ── LOAD ROSTER ──
+  async function loadMyRoster() {
+    if (!currentTeam) return
+    const { data } = await supabase.from('rosters').select('*, players(*)')
+      .eq('team_id', currentTeam.id)
+    myRoster = (data || []).map(r => ({ ...r.players, slot: r.slot, roster_id: r.id }))
+  }
+
+  // ── OPEN SACRIFICE SECTION ──
+  window.openSacrifice = function() {
+    selectedPlayers.clear()
+    // Make sure section is visible then scroll to it
+    document.getElementById('sacrificeSection').style.display = 'block'
+    renderRosterForTrade()
+    updateTradeCounter()
+    setTimeout(() => {
+      document.getElementById('sacrificeSection').scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+
+  // ── RENDER ROSTER ──
+  function renderRosterForTrade() {
+    const grid = document.getElementById('rosterTradeGrid')
+    if (!myRoster.length) {
+      grid.innerHTML = `<div class="empty-state"><p>No players on your roster.</p></div>`
+      return
+    }
+    grid.innerHTML = myRoster.map(p => {
+      const tier = (p.tier || 'bronze').toLowerCase()
+      const val  = TIER_VALUE[tier] || 10
+      const sel  = selectedPlayers.has(p.id)
+      return `<div class="trade-player-card ${sel?'selected':''}" onclick="toggleTradePlayer('${p.id}')">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div class="trade-player-name">${p.name}</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-player-meta">
+          <span class="trade-pos">${p.position}</span>
+          <span class="trade-tier ${tier}">${tier}</span>
+          <span class="trade-value">${val}v</span>
+        </div>
+      </div>`
+    }).join('')
+  }
+
+  window.toggleTradePlayer = function(playerId) {
+    if (selectedPlayers.has(playerId)) selectedPlayers.delete(playerId)
+    else selectedPlayers.add(playerId)
+    renderRosterForTrade()
+    updateTradeCounter()
+  }
+
+  function updateTradeCounter() {
+    const total = Array.from(selectedPlayers).reduce((sum, id) => {
+      const p = myRoster.find(r => r.id === id)
+      return sum + (TIER_VALUE[(p?.tier||'bronze').toLowerCase()] || 10)
+    }, 0)
+
+    document.getElementById('tradeValEl').textContent = total
+    const pct = Math.min((total / CLAIM_THRESHOLD) * 100, 100)
+    document.getElementById('tradeProgressFill').style.width = pct + '%'
+
+    const btn = document.getElementById('btnConfirmClaim')
+    if (total >= CLAIM_THRESHOLD) {
+      btn.classList.add('ready')
+      btn.textContent = `⚔️ Sacrifice ${selectedPlayers.size} Players & Claim`
+    } else {
+      btn.classList.remove('ready')
+      btn.textContent = `Need ${CLAIM_THRESHOLD - total} more value`
+    }
+  }
+
+  // ── CONFIRM CLAIM ──
+  window.confirmLegendaryClaim = async function() {
+    if (!featuredCard || selectedPlayers.size === 0) return
+    const total = Array.from(selectedPlayers).reduce((sum, id) => {
+      const p = myRoster.find(r => r.id === id)
+      return sum + (TIER_VALUE[(p?.tier||'bronze').toLowerCase()] || 10)
+    }, 0)
+    if (total < CLAIM_THRESHOLD) { showToast(`Need ${CLAIM_THRESHOLD}+ trade value!`, 'error'); return }
+
+    const btn = document.getElementById('btnConfirmClaim')
+    const origText = btn.textContent
+    btn.textContent = 'Processing...'
+    btn.classList.remove('ready')
+
+    try {
+      const tradedPlayers = Array.from(selectedPlayers).map(id => {
+        const p = myRoster.find(r => r.id === id)
+        return { id: p.id, name: p.name, tier: p.tier, value: TIER_VALUE[(p.tier||'bronze').toLowerCase()]||10, roster_id: p.roster_id }
+      })
+
+      // 1. Remove sacrificed players from rosters
+      for (const p of tradedPlayers) {
+        const { error } = await supabase.from('rosters').delete().eq('id', p.roster_id)
+        if (error) throw new Error(`Failed to remove roster row ${p.roster_id}: ${error.message}`)
+      }
+
+      // 2. Void sacrificed players for 1 week
+      const voidUntil = new Date(Date.now() + 7*24*60*60*1000).toISOString()
+      for (const p of tradedPlayers) {
+        const { error } = await supabase.from('players')
+          .update({ is_voided: true, voided_until: voidUntil })
+          .eq('id', p.id)
+        if (error) console.warn(`Could not void player ${p.id}: ${error.message}`)
+      }
+
+      // 3. Mark legendary as claimed
+      const { error: claimErr } = await supabase.from('legendary_players').update({
+        is_claimed:        true,
+        owner_team_id:     currentTeam.id,
+        claimed_at:        new Date().toISOString(),
+        trade_value_given: total,
+      }).eq('id', featuredCard.id)
+      if (claimErr) throw new Error(`Failed to mark legendary claimed: ${claimErr.message}`)
+
+      // 4. Log the claim in legendary_claims
+      const { error: logErr } = await supabase.from('legendary_claims').insert({
+        legendary_player_id: featuredCard.id,
+        team_id:             currentTeam.id,
+        league_id:           currentTeam.league_id,
+        players_traded_in:   tradedPlayers,
+        total_value_traded:  total,
+      })
+      if (logErr) console.warn(`Could not log claim: ${logErr.message}`)
+
+      // 5. Add legendary player to the team's bench via rosters
+      // Look up by name only (ilike = case-insensitive exact match)
+      const { data: nameMatches, error: lookupErr } = await supabase
+        .from('players')
+        .select('id, name')
+        .ilike('name', featuredCard.player_name)
+        .limit(5)
+
+      const playerRow = nameMatches && nameMatches.length > 0 ? nameMatches[0] : null
+
+      if (playerRow?.id) {
+        const { error: rosterErr } = await supabase.from('rosters').insert({
+          team_id:   currentTeam.id,
+          league_id: currentTeam.league_id,
+          player_id: playerRow.id,
+          slot:      featuredCard.position,
+          is_active: false,
+          is_keeper: true,   // marks this as a legendary card on the roster
+        })
+        if (rosterErr) {
+          showToast('Card claimed! But bench add failed: ' + rosterErr.message, 'error')
+        }
+      } else {
+        showToast('Card claimed! But player not found in players table.', 'error')
+      }
+
+      const justClaimedId = featuredCard.id
+      await supabase.from('live_feed').insert({
+        league_id:   currentTeam.league_id,
+        event_type:  'legendary',
+        description: `👑 ${currentTeam.team_name || currentTeam.name || 'A team'} claimed LEGENDARY ${featuredCard.display_name || featuredCard.player_name}, sacrificing ${tradedPlayers.length} card${tradedPlayers.length === 1 ? '' : 's'}`,
+        created_at:  new Date().toISOString()
+      })
+      showToast(`👑 ${featuredCard.display_name || featuredCard.player_name} claimed!`, 'success')
+      selectedPlayers.clear()
+      await Promise.all([loadFeaturedCard(justClaimedId), loadMyRoster()])
+      // Hide sacrifice section since card is now claimed
+      document.getElementById('sacrificeSection').style.display = 'none'
+    } catch(err) {
+      console.error('Claim failed:', err)
+      showToast(`Failed: ${err.message}`, 'error')
+      btn.classList.add('ready')
+      btn.textContent = origText
+    }
+  }
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.className = `toast show ${type}`
+    setTimeout(() => t.className = 'toast', 3000)
+  }
+
+  init()
+</script>
+</body>
+</html>
