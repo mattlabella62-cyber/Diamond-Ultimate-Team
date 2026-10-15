@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diamond Cut Fantasy — Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --gold: #F5C518;
+  --gold2: #FFE066;
+  --gold-glow: rgba(245,197,24,0.3);
+  --red: #E8433B;
+  --green: #27C96A;
+  --blue: #3B8BF5;
+  --platinum-c: #c4b5fd;
+  --bronze-c: #f0a070;
+  --silver-c: #c0d8f0;
+  --bg: #060810;
+  --bg2: #0A0D14;
+  --surface: #0F1218;
+  --surface2: #151B25;
+  --surface3: #1C2333;
+  --border: #1E2535;
+  --border2: #283044;
+  --text: #E8ECF4;
+  --muted: #5A6A82;
+  --muted2: #3A4558;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(245,197,24,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(59,139,245,0.04) 0%, transparent 50%);
+}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 230px; min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; z-index: 200;
+}
+.logo {
+  padding: 22px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-diamond {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold), #FF8C00);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.logo-text { line-height: 1; }
+.logo-name { font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; color: var(--gold); }
+.logo-sub { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+.nav { padding: 14px 12px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.nav-section { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted2); padding: 10px 8px 5px; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(245,197,24,0.1); color: var(--gold); border: 1px solid rgba(245,197,24,0.2); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; background: var(--gold); border-radius: 0 2px 2px 0;
+}
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; font-family: var(--font-mono); font-size: 9px; background: var(--red); color: white; padding: 2px 6px; border-radius: 99px; font-weight: 700; }
+.coin-widget {
+  margin: 12px;
+  background: linear-gradient(135deg, rgba(245,197,24,0.08), rgba(245,197,24,0.03));
+  border: 1px solid rgba(245,197,24,0.2); border-radius: 10px; padding: 14px;
+}
+.coin-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.coin-amount { font-family: var(--font-display); font-size: 34px; color: var(--gold); line-height: 1.1; margin-top: 2px; }
+.coin-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.coin-track { height: 4px; background: var(--border2); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.coin-fill { height: 100%; width: 68%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 99px; }
+
+/* ═══ MAIN ═══ */
+.main { margin-left: 230px; flex: 1; display: flex; flex-direction: column; }
+.topbar {
+  height: 58px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 28px; gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-title { font-family: var(--font-display); font-size: 22px; letter-spacing: 3px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.week-pill { font-family: var(--font-mono); font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border2); padding: 5px 12px; border-radius: 99px; }
+.sport-toggle { display: flex; background: var(--surface2); border: 1px solid var(--border2); border-radius: 7px; overflow: hidden; }
+.sport-btn { font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 16px; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; letter-spacing: 1px; }
+.sport-btn.active { background: var(--gold); color: var(--bg); }
+.user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--red)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 14px; color: var(--bg); cursor: pointer; }
+
+/* ═══ CONTENT ═══ */
+.content { padding: 24px 28px 60px; display: flex; flex-direction: column; gap: 22px; }
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden; transition: transform 0.2s; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 12px 12px 0 0; }
+.stat-card.s-gold::after { background: var(--gold); }
+.stat-card.s-green::after { background: var(--green); }
+.stat-card.s-blue::after { background: var(--blue); }
+.stat-card.s-red::after { background: var(--red); }
+.stat-bg-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 40px; opacity: 0.05; }
+.stat-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.stat-value { font-family: var(--font-display); font-size: 42px; line-height: 1.1; margin-top: 4px; }
+.stat-card.s-gold .stat-value { color: var(--gold); }
+.stat-card.s-green .stat-value { color: var(--green); }
+.stat-card.s-blue .stat-value { color: var(--blue); }
+.stat-card.s-red .stat-value { color: var(--red); }
+.stat-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.stat-note .up { color: var(--green); }
+.stat-note .dn { color: var(--red); }
+
+/* ═══ PLAYER CARDS ═══ */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-family: var(--font-display); font-size: 18px; letter-spacing: 2px; color: var(--text); }
+.section-action { font-family: var(--font-mono); font-size: 10px; color: var(--gold); border: 1px solid rgba(245,197,24,0.3); padding: 5px 12px; border-radius: 5px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+.section-action:hover { background: rgba(245,197,24,0.1); }
+.cards-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 10px 14px 12px; }
+.cards-scroll::-webkit-scrollbar { height: 3px; }
+.cards-scroll::-webkit-scrollbar-track { background: transparent; }
+.cards-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+.player-card {
+  flex-shrink: 0; width: 150px; height: 215px;
+  border-radius: 14px; position: relative; overflow: hidden;
+  cursor: pointer; transition: transform 0.25s, box-shadow 0.25s;
+}
+.player-card:hover { transform: translateY(-8px) scale(1.03); }
+
+/* ── Vivid tier backgrounds ── */
+.player-card.bronze {
+  background: linear-gradient(160deg, #5a1a00, #2e0e00);
+  border: 1px solid rgba(210,100,50,0.65);
+  box-shadow: 0 4px 20px rgba(210,100,50,0.2);
+}
+.player-card.bronze:hover { box-shadow: 0 14px 44px rgba(210,100,50,0.55); }
+
+.player-card.silver {
+  background: linear-gradient(160deg, #1a2a3e, #0d1824);
+  border: 1px solid rgba(100,160,220,0.6);
+  box-shadow: 0 4px 20px rgba(80,140,210,0.2);
+}
+.player-card.silver:hover { box-shadow: 0 14px 44px rgba(80,140,210,0.5); }
+
+.player-card.gold {
+  background: linear-gradient(160deg, #5a3800, #2e1c00);
+  border: 1px solid rgba(240,180,0,0.7);
+  box-shadow: 0 4px 20px rgba(240,180,0,0.25);
+}
+.player-card.gold:hover { box-shadow: 0 14px 44px rgba(240,180,0,0.5); }
+
+.player-card.platinum {
+  background: linear-gradient(160deg, #2e0a7a, #160542);
+  border: 1px solid rgba(155,80,255,0.7);
+  box-shadow: 0 4px 20px rgba(140,60,240,0.25);
+}
+.player-card.platinum:hover { box-shadow: 0 14px 44px rgba(140,60,240,0.55); }
+
+.player-card.legendary {
+  background: linear-gradient(160deg, #7a3500, #3d1a00);
+  border: 1px solid rgba(255,180,0,0.85);
+  box-shadow: 0 4px 30px rgba(255,140,0,0.35);
+}
+.player-card.legendary:hover { box-shadow: 0 14px 50px rgba(255,140,0,0.65); }
+
+/* ── Pack skin reskins — full takeover: background AND border/glow both
+   become the equipped skin's palette. Rarity no longer reads from card
+   color — it reads from the .card-tier badge (BRONZE/SILVER/GOLD/etc,
+   untouched by these rules) and the .card-coin point number, which
+   stays tier-colored on purpose as a second at-a-glance anchor. Colors
+   mirror each skin's entry in packskins.js (swatch[0]/[1] = background,
+   swatch[2] = accent border/glow/name text). No rule for "classic". */
+.player-card.skin-inferno    { background: linear-gradient(160deg, #4a0a0a, #2b0505); border: 1px solid rgba(255,59,59,0.6); box-shadow: 0 4px 20px rgba(255,59,59,0.25); }
+.player-card.skin-frostbite  { background: linear-gradient(160deg, #0a3a30, #0a2e28); border: 1px solid rgba(122,255,224,0.6); box-shadow: 0 4px 20px rgba(122,255,224,0.25); }
+.player-card.skin-toxic      { background: linear-gradient(160deg, #0a1a0a, #0a2a10); border: 1px solid rgba(170,255,77,0.6); box-shadow: 0 4px 20px rgba(170,255,77,0.25); }
+.player-card.skin-golden     { background: linear-gradient(160deg, #3a3208, #2a2505); border: 1px solid rgba(232,255,110,0.65); box-shadow: 0 4px 20px rgba(232,255,110,0.3); }
+.player-card.skin-void       { background: linear-gradient(160deg, #2a0a1a, #0f050a); border: 1px solid rgba(255,102,196,0.6); box-shadow: 0 4px 20px rgba(255,102,196,0.3); }
+.player-card.skin-camo       { background: linear-gradient(160deg, #1c2814, #2b3a1f); border: 1px solid rgba(163,193,120,0.55); box-shadow: 0 4px 20px rgba(122,143,74,0.25); }
+.player-card.skin-digital    { background: linear-gradient(160deg, #1a2e2e, #1a1a1a); border: 1px solid rgba(77,255,200,0.6); box-shadow: 0 4px 20px rgba(77,255,200,0.25); }
+.player-card.skin-chrome     { background: linear-gradient(160deg, #3a3a3a, #0d0d0d); border: 1px solid rgba(245,245,245,0.6); box-shadow: 0 4px 20px rgba(245,245,245,0.2); }
+.player-card.skin-prestige   { background: linear-gradient(160deg, #1a0a10, #000000); border: 1px solid rgba(255,77,109,0.6); box-shadow: 0 4px 20px rgba(255,77,109,0.25); }
+.player-card.skin-gridrunner { background: linear-gradient(160deg, #04141f, #000000); border: 1px solid rgba(41,224,255,0.7); box-shadow: 0 4px 20px rgba(41,224,255,0.3); }
+
+.skin-inferno .card-name    { color: #ff3b3b; }
+.skin-frostbite .card-name  { color: #7affe0; }
+.skin-toxic .card-name      { color: #aaff4d; }
+.skin-golden .card-name     { color: #e8ff6e; }
+.skin-void .card-name       { color: #ff66c4; }
+.skin-camo .card-name       { color: #a3c178; }
+.skin-digital .card-name    { color: #4dffc8; }
+.skin-chrome .card-name     { color: #f5f5f5; }
+.skin-prestige .card-name   { color: #ff4d6d; }
+.skin-gridrunner .card-name { color: #29e0ff; }
+
+/* Card shine */
+.card-shine {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, transparent 50%, rgba(255,255,255,0.02) 100%);
+  pointer-events: none; z-index: 3;
+}
+.player-card.legendary .card-shine {
+  background: linear-gradient(135deg, rgba(255,180,0,0.12) 0%, transparent 40%, rgba(255,180,0,0.08) 80%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+/* Rays behind silhouette */
+.card-rays {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255,255,255,0.04) 0deg 10deg, transparent 10deg 20deg);
+}
+
+/* Bottom glow arc */
+.card-glow {
+  position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 50px; border-radius: 50%;
+  z-index: 1; pointer-events: none; filter: blur(18px);
+}
+.bronze .card-glow { background: rgba(210,100,50,0.7); }
+.silver .card-glow { background: rgba(80,140,220,0.7); }
+.gold .card-glow { background: rgba(240,180,0,0.7); }
+.platinum .card-glow { background: rgba(140,60,255,0.7); }
+.legendary .card-glow { background: rgba(255,140,0,0.85); }
+/* Skinned cards: the glow blob behind the art matches the skin, not the tier. */
+.skin-inferno .card-glow    { background: rgba(255,59,59,0.7); }
+.skin-frostbite .card-glow  { background: rgba(122,255,224,0.7); }
+.skin-toxic .card-glow      { background: rgba(170,255,77,0.7); }
+.skin-golden .card-glow     { background: rgba(232,255,110,0.7); }
+.skin-void .card-glow       { background: rgba(255,102,196,0.7); }
+.skin-camo .card-glow       { background: rgba(163,193,120,0.6); }
+.skin-digital .card-glow    { background: rgba(77,255,200,0.7); }
+.skin-chrome .card-glow     { background: rgba(245,245,245,0.6); }
+.skin-prestige .card-glow   { background: rgba(255,77,109,0.7); }
+.skin-gridrunner .card-glow { background: rgba(41,224,255,0.75); }
+/* Skinned cards: hide the plain-white sunburst rays so the skin's own
+   background/pattern reads clean instead of fighting with it. */
+.player-card[class*="skin-"] .card-rays { display: none; }
+
+/* Tier badge */
+.card-tier {
+  position: absolute; top: 8px; left: 8px;
+  font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;
+  padding: 3px 7px; border-radius: 4px; z-index: 10;
+}
+.bronze .card-tier  { background: rgba(0,0,0,0.4); color: #f0a070; border: 1px solid rgba(210,100,50,0.5); }
+.silver .card-tier  { background: rgba(0,0,0,0.4); color: #c0d8f0; border: 1px solid rgba(100,160,220,0.5); }
+.gold .card-tier    { background: rgba(0,0,0,0.4); color: #ffe066; border: 1px solid rgba(240,180,0,0.5); }
+.platinum .card-tier{ background: rgba(0,0,0,0.4); color: #c4b5fd; border: 1px solid rgba(155,80,255,0.5); }
+.legendary .card-tier{ background: rgba(0,0,0,0.4); color: #FFD166; border: 1px solid rgba(255,180,0,0.7); }
+
+/* Coin / value badge */
+.card-coin { position: absolute; top: 8px; right: 8px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; z-index: 10; }
+.bronze .card-coin   { color: #f0a070; }
+.silver .card-coin   { color: #c0d8f0; }
+.gold .card-coin     { color: #ffe066; }
+.platinum .card-coin { color: #c4b5fd; }
+.legendary .card-coin{ color: #FFD166; }
+
+/* Art area */
+.card-art-batter { position:absolute;top:35px;left:0;right:0;bottom:52px;display:flex;align-items:center;justify-content:center;overflow:hidden; }
+.card-art-batter .card-art-fill { width:95%;height:95%; }
+.card-art-pitcher { position:absolute;top:20px;left:0;right:0;bottom:52px;display:flex;align-items:center;justify-content:center;overflow:hidden; }
+.card-art-pitcher .card-art-fill { width:90%;height:95%; }
+
+/* ── Silhouette fill: the real player art stays the mask (shape only);
+   what paints inside that shape is a themed pattern per equipped skin,
+   instead of flat white. No separate art assets needed per skin. ── */
+.card-art-fill {
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  filter: drop-shadow(0 0 16px rgba(255,255,255,0.5));
+  z-index: 2;
+}
+/* Flat, solid-color silhouettes — the player himself is tinted to the
+   skin's color (e.g. toxic = green player, gridrunner = cyan player),
+   no texture/pattern, so it always reads clean at any card size. */
+.card-art-fill.fill-classic    { background: #fff; }
+.card-art-fill.fill-inferno    { background: #fff; }
+.card-art-fill.fill-frostbite  { background: #fff; }
+.card-art-fill.fill-toxic      { background: #fff; }
+.card-art-fill.fill-golden     { background: #fff; }
+.card-art-fill.fill-void       { background: #fff; }
+.card-art-fill.fill-camo       { background: #e3c88f; }
+.card-art-fill.fill-digital    { background: #fff; }
+.card-art-fill.fill-chrome     { background: linear-gradient(100deg, #fff 25%, #fff 38%, #c9c9c9 44%, #fff 50%, #fff 70%); }
+.card-art-fill.fill-prestige   { background: #e8e8ee; }
+.card-art-fill.fill-gridrunner { background: #fff; }
+
+/* Divider */
+.card-divider { position: absolute; top: 146px; left: 10px; right: 10px; height: 1px; z-index: 4; }
+.bronze .card-divider   { background: rgba(210,100,50,0.4); }
+.silver .card-divider   { background: rgba(100,160,220,0.35); }
+.gold .card-divider     { background: rgba(240,180,0,0.4); }
+.platinum .card-divider { background: rgba(155,80,255,0.4); }
+.legendary .card-divider{ background: rgba(255,180,0,0.6); }
+
+/* Card info */
+.card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px 10px; background: rgba(0,0,0,0.55); z-index: 5; }
+.card-name { font-family: var(--font-display); font-size: 15px; letter-spacing: 1px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bronze .card-name   { color: #f0a070; }
+.silver .card-name   { color: #c0d8f0; }
+.gold .card-name     { color: #ffe066; }
+.platinum .card-name { color: #c4b5fd; }
+.legendary .card-name{ color: #FFD166; text-shadow: 0 0 10px rgba(255,180,0,0.6); }
+.card-pos-team { font-family: var(--font-mono); font-size: 9px; color: var(--muted); margin-top: 3px; display: flex; justify-content: space-between; }
+.card-pts { font-family: var(--font-mono); font-size: 11px; font-weight: 700; margin-top: 4px; color: var(--green); }
+.card-pts.zero { color: var(--muted); }
+.card-pts.injured { color: var(--red); }
+
+/* Injured overlay */
+.card-injured-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 60px;
+  background: rgba(232,67,59,0.12); border-radius: 14px 14px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 6;
+}
+.injured-badge { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #fff; background: rgba(232,67,59,0.85); border: 1px solid rgba(232,67,59,0.9); padding: 4px 12px; border-radius: 99px; letter-spacing: 1px; }
+
+/* ═══ CAP BAR ═══ */
+.cap-bar-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 20px; }
+.cap-bar-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; color: var(--muted); white-space: nowrap; }
+.cap-bar-track { flex: 1; height: 6px; background: var(--border2); border-radius: 99px; overflow: hidden; }
+.cap-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--green), var(--gold)); border-radius: 99px; }
+.cap-bar-val { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+
+/* ═══ MAIN GRID ═══ */
+.main-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--border); }
+.panel-title { font-family: var(--font-display); font-size: 16px; letter-spacing: 2px; }
+.panel-link { font-family: var(--font-mono); font-size: 10px; color: var(--gold); text-decoration: none; border: 1px solid rgba(245,197,24,0.3); padding: 4px 10px; border-radius: 4px; transition: all 0.15s; }
+.panel-link:hover { background: rgba(245,197,24,0.1); }
+
+/* ═══ LEADERBOARD ═══ */
+.lb-row { display: flex; align-items: center; gap: 12px; padding: 11px 18px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: var(--surface2); }
+.lb-row.me { background: rgba(245,197,24,0.05); border-left: 2px solid var(--gold); }
+.lb-rank { font-family: var(--font-display); font-size: 22px; color: var(--muted2); width: 26px; text-align: center; }
+.lb-rank.gold-rank { color: var(--gold); }
+.lb-info { flex: 1; }
+.lb-name { font-size: 13px; font-weight: 600; }
+.lb-record { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.lb-pts { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--green); }
+.lb-delta { font-family: var(--font-mono); font-size: 10px; width: 36px; text-align: right; }
+.lb-delta.up { color: var(--green); }
+.lb-delta.dn { color: var(--red); }
+
+/* ═══ LEGENDARY PANEL ═══ */
+.legendary-feature { margin: 14px; border-radius: 12px; background: linear-gradient(160deg, #3d1a00, #1c0d00); border: 1px solid rgba(255,160,0,0.45); padding: 18px; position: relative; overflow: hidden; }
+.legendary-feature::before { content: ''; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; background: radial-gradient(ellipse, rgba(255,160,0,0.18), transparent 70%); pointer-events: none; }
+.leg-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: 3px; color: var(--gold); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; text-transform: uppercase; }
+.leg-card-visual { width: 100%; height: 160px; border-radius: 10px; background: linear-gradient(160deg, #5a2800, #2a1200); border: 1px solid rgba(255,160,0,0.5); display: flex; align-items: center; justify-content: space-between; padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.leg-card-visual::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,160,0,0.1) 0%, transparent 60%); }
+.leg-player-art { width: 80px; height: 130px; display: flex; align-items: center; justify-content: center; }
+.leg-player-info { flex: 1; padding-left: 14px; z-index: 1; }
+.leg-crown { font-size: 20px; margin-bottom: 4px; }
+.leg-name { font-family: var(--font-display); font-size: 24px; color: var(--gold); line-height: 1; text-shadow: 0 0 15px rgba(255,160,0,0.5); }
+.leg-detail { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.leg-timer { position: absolute; top: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; color: var(--red); background: rgba(232,67,59,0.1); border: 1px solid rgba(232,67,59,0.2); padding: 3px 8px; border-radius: 99px; }
+.boost-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.boost-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,160,0,0.07); border: 1px solid rgba(255,160,0,0.15); border-radius: 6px; padding: 7px 10px; font-size: 12px; }
+.boost-pts { font-family: var(--font-mono); font-size: 12px; color: var(--gold); font-weight: 700; }
+.cost-box { background: rgba(232,67,59,0.07); border: 1px solid rgba(232,67,59,0.2); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+.cost-box strong { color: var(--text); }
+.btn { width: 100%; padding: 11px; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 15px; letter-spacing: 2px; cursor: pointer; transition: all 0.15s; display: block; text-align: center; margin-bottom: 8px; }
+.btn-gold { background: var(--gold); color: var(--bg); }
+.btn-gold:hover { background: var(--gold2); transform: translateY(-1px); box-shadow: 0 6px 20px var(--gold-glow); }
+.btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ═══ THREE COL ═══ */
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.auction-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
+.auction-item:last-child { border-bottom: none; }
+.auction-item:hover { background: var(--surface2); }
+.auction-badge { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 11px; flex-shrink: 0; }
+.auction-badge.gold     { background: rgba(240,180,0,0.12);   color: #ffe066;  border: 1px solid rgba(240,180,0,0.3); }
+.auction-badge.silver   { background: rgba(100,160,220,0.1);  color: #c0d8f0;  border: 1px solid rgba(100,160,220,0.25); }
+.auction-badge.platinum { background: rgba(155,80,255,0.12);  color: #c4b5fd;  border: 1px solid rgba(155,80,255,0.3); }
+.auction-info { flex: 1; min-width: 0; }
+.auction-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auction-pos { font-size: 11px; color: var(--muted); }
+.auction-meta { text-align: right; }
+.auction-floor { font-family: var(--font-mono); font-size: 9px; color: var(--muted); }
+.auction-time { font-family: var(--font-mono); font-size: 10px; color: var(--red); }
+.bid-btn { font-family: var(--font-mono); font-size: 10px; padding: 5px 10px; border-radius: 5px; border: 1px solid rgba(245,197,24,0.3); background: rgba(245,197,24,0.07); color: var(--gold); cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+.bid-btn:hover { background: rgba(245,197,24,0.18); }
+
+.feed-item { display: flex; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--border); animation: fadeSlide 0.4s ease; }
+.feed-item:last-child { border-bottom: none; }
+@keyframes fadeSlide { from{opacity:0;transform:translateY(-5px);} to{opacity:1;transform:translateY(0);} }
+.feed-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.feed-main { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.feed-main strong { color: var(--text); }
+.feed-pts { color: var(--green); font-weight: 600; }
+.feed-alert { color: var(--red); }
+.feed-time { font-family: var(--font-mono); font-size: 9px; color: var(--muted2); margin-top: 3px; }
+.live-indicator { display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.live-text { font-family: var(--font-mono); font-size: 9px; color: var(--red); letter-spacing: 1px; }
+
+.reroll-body { padding: 16px; }
+.reroll-info { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.reroll-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(59,139,245,0.1); border: 1px solid rgba(59,139,245,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.reroll-text h4 { font-size: 14px; font-weight: 600; }
+.reroll-text p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.avail-tag { font-family: var(--font-mono); font-size: 10px; color: var(--green); background: rgba(39,201,106,0.1); border: 1px solid rgba(39,201,106,0.2); padding: 3px 9px; border-radius: 99px; margin-left: auto; }
+.reroll-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.reroll-btn { padding: 9px; border-radius: 7px; border: none; font-family: var(--font-display); font-size: 12px; letter-spacing: 1px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.reroll-btn.safe { background: rgba(59,139,245,0.15); color: var(--blue); border: 1px solid rgba(59,139,245,0.3); }
+.reroll-btn.safe:hover { background: rgba(59,139,245,0.25); }
+.reroll-btn.risky { background: rgba(232,67,59,0.1); color: var(--red); border: 1px solid rgba(232,67,59,0.25); }
+.reroll-btn.risky:hover { background: rgba(232,67,59,0.2); }
+.injury-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.injury-item:last-child { border-bottom: none; }
+.injury-name { font-size: 13px; font-weight: 500; flex: 1; }
+.injury-pos { font-size: 11px; color: var(--muted); }
+.injury-cost { font-family: var(--font-mono); font-size: 11px; color: var(--gold); }
+.add-btn { font-family: var(--font-mono); font-size: 10px; padding: 4px 10px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.add-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-diamond">⬦</div>
+    <div class="logo-text">
+      <div class="logo-name">Diamond Cut</div>
+      <div class="logo-sub" id="sidebarSportSub">MLB · SEASON 2026</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-item active" href="dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+    <a class="nav-item" href="roster.html"><span class="nav-icon">🃏</span> My Roster</a>
+    <a class="nav-item" href="auction.html"><span class="nav-icon">🏷️</span> Auction House</a>
+    <a class="nav-item" href="legendary.html"><span class="nav-icon">👑</span> Legendary</a>
+    <div class="nav-section">League</div>
+    <a class="nav-item" href="standings.html"><span class="nav-icon">🏆</span> Standings</a>
+    <a class="nav-item" href="matchup.html"><span class="nav-icon">⚔️</span> Matchup</a>
+    <a class="nav-item" href="history.html"><span class="nav-icon">📜</span> League History</a>
+    <a class="nav-item" href="trade.html"><span class="nav-icon">🔄</span> Trade Center<span class="nav-badge" id="tradeBadge" style="display:none">0</span></a>
+    <a class="nav-item" href="injury.html"><span class="nav-icon">🏥</span> Injury Pool</a>
+    <a class="nav-item" href="pack.html"><span class="nav-icon">📦</span> Open Pack</a>
+    <div class="nav-section">Account</div>
+    <a class="nav-item" href="cosmetics.html"><span class="nav-icon">🎨</span> Cosmetics</a>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="coin-widget">
+    <div class="coin-label">Coin Balance</div>
+    <div class="coin-amount" id="coinAmount">500</div>
+    <div class="coin-sub" id="coinSub">500 coins this week</div>
+    <div class="coin-track"><div class="coin-fill" id="coinFill" style="width:100%"></div></div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div style="position:relative">
+      <button id="leagueNameBtn" onclick="toggleLeagueDropdown(event)" style="font-family:var(--font-mono);font-size:11px;font-weight:700;padding:7px 12px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.25);border-radius:8px;color:var(--gold);cursor:pointer;letter-spacing:1px;display:flex;align-items:center;gap:6px;transition:background 0.15s;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        <span id="leagueNameText">My League</span> <span style="font-size:9px;opacity:0.7">▾</span>
+      </button>
+      <div id="leagueDropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.5);z-index:500;overflow:hidden">
+        <div style="padding:8px 12px;font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)">My Leagues</div>
+        <div id="leagueDropdownList" style="max-height:240px;overflow-y:auto"></div>
+        <div style="padding:8px;border-top:1px solid var(--border);display:flex;gap:6px">
+          <a href="join-league.html" style="flex:1;padding:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--muted);font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1px;text-align:center;text-decoration:none">🔗 JOIN</a>
+          <a href="create-league.html" style="flex:1;padding:8px;background:var(--gold);border:none;border-radius:7px;color:#000;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1px;text-align:center;text-decoration:none">+ CREATE</a>
+        </div>
+      </div>
+    </div>
+    <div class="week-pill" id="weekPill">WEEK 1 OF 18</div>
+    <div class="sport-pill" id="sportPill" style="font-family:var(--font-mono);font-size:11px;font-weight:700;padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--muted);">MLB</div>
+    <div class="user-avatar" id="userAvatar">--</div>
+  </div>
+
+  <div class="content">
+
+    <!-- STAT CARDS -->
+    <div class="stat-row">
+      <div class="stat-card s-gold"><div class="stat-bg-icon">⚡</div><div class="stat-label">Week Score</div><div class="stat-value" id="statWeekScore">0</div><div class="stat-note" id="statWeekNote">no games yet</div></div>
+      <div class="stat-card s-green"><div class="stat-bg-icon">🏆</div><div class="stat-label">League Rank</div><div class="stat-value">#2</div><div class="stat-note"><span class="up">↑ 1 spot</span> this week</div></div>
+      <div class="stat-card s-blue"><div class="stat-bg-icon">💎</div><div class="stat-label">Team Cap Used</div><div class="stat-value" id="statCapUsed">0</div><div class="stat-note" id="statCapNote">loading...</div></div>
+      <div class="stat-card s-red"><div class="stat-bg-icon">🏥</div><div class="stat-label">Active Injuries</div><div class="stat-value" id="statInjuries">0</div><div class="stat-note" id="statInjuryNote">all healthy</div></div>
+    </div>
+
+    <!-- CAP BAR -->
+    <div class="cap-bar-wrap">
+      <div class="cap-bar-label">TEAM CAP</div>
+      <div class="cap-bar-track"><div class="cap-bar-fill"></div></div>
+      <div class="cap-bar-val" id="capBarVal">0 / 500</div>
+    </div>
+
+    <!-- BATTER CARDS -->
+    <div class="cards-section">
+      <div class="section-header">
+        <div class="section-title" id="rosterTitle">Active Roster</div>
+        <a class="section-action" href="create-league.html">+ New League</a>
+      </div>
+      <div id="noLeagueMsg" style="display:none;padding:20px;text-align:center;font-family:var(--font-mono);font-size:12px;color:var(--muted);">
+        No active league. <a href="create-league.html" style="color:var(--gold);">Create one</a>
+      </div>
+      <div class="cards-scroll" id="batterCards">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:20px;">Loading roster...</div>
+      </div>
+    </div>
+
+    <!-- PITCHER CARDS -->
+    <div class="cards-section" id="pitcherSection">
+      <div class="section-header">
+        <div class="section-title" id="rosterTitle2">Active Roster — Pitchers</div>
+      </div>
+      <div class="cards-scroll" id="pitcherCards"></div>
+    </div>
+
+    <!-- LEADERBOARD + LEGENDARY -->
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">League Standings</span><a class="panel-link" href="#">Full Table →</a></div>
+        <div class="lb-row me"><div class="lb-rank gold-rank">2</div><div class="lb-info"><div class="lb-name">Your Team ← you</div><div class="lb-record">4-2 · W1 streak</div></div><div class="lb-pts">284</div><div class="lb-delta up">+38</div></div>
+        <div class="lb-row"><div class="lb-rank gold-rank">1</div><div class="lb-info"><div class="lb-name">Thunder Bats</div><div class="lb-record">5-1 · W3 streak</div></div><div class="lb-pts">312</div><div class="lb-delta up">+22</div></div>
+        <div class="lb-row"><div class="lb-rank">3</div><div class="lb-info"><div class="lb-name">Diamond Dogs</div><div class="lb-record">4-2 · L1</div></div><div class="lb-pts">271</div><div class="lb-delta dn">-6</div></div>
+        <div class="lb-row"><div class="lb-rank">4</div><div class="lb-info"><div class="lb-name">RBI Kings</div><div class="lb-record">3-3 · W2</div></div><div class="lb-pts">248</div><div class="lb-delta up">+11</div></div>
+        <div class="lb-row"><div class="lb-rank">5</div><div class="lb-info"><div class="lb-name">Ace Factory</div><div class="lb-record">2-4 · L2</div></div><div class="lb-pts">219</div><div class="lb-delta dn">-14</div></div>
+        <div class="lb-row"><div class="lb-rank">6</div><div class="lb-info"><div class="lb-name">Slugger Squad</div><div class="lb-record">1-5 · L4</div></div><div class="lb-pts">188</div><div class="lb-delta dn">-9</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">👑 This Week's Legendary</span><span id="legTimeLeft" style="font-family:var(--font-mono);font-size:9px;color:var(--red)"></span></div>
+        <div id="legWidget" class="legendary-feature">
+          <div style="padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--muted);">Loading...</div>
+        </div>
+        <a href="legendary.html" id="legClaimBtn" style="display:none;margin:10px 14px 14px;padding:10px;background:var(--gold);color:#000;font-family:var(--font-mono);font-size:11px;font-weight:700;text-align:center;border-radius:8px;text-decoration:none;letter-spacing:1px;">⚔️ SACRIFICE CARDS TO CLAIM</a>
+    </div>
+
+    <!-- BOTTOM THREE COLS -->
+    <div class="three-col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Live Feed</span><div class="live-indicator"><div class="live-dot"></div><span class="live-text">LIVE</span></div></div>
+        <div id="liveFeedContainer" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:16px;max-height:340px;overflow-y:auto;">Loading...</div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Auction House</span><a class="panel-link" href="auction.html">View All →</a></div>
+        <div id="auctionContainer" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:16px;">Loading...</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title" id="rerollPanelTitle">Weekly Reroll</span></div>
+          <div class="reroll-body">
+            <div class="reroll-info">
+              <div class="reroll-icon">🔁</div>
+              <div class="reroll-text" id="rerollStatusText"><h4>Checking...</h4><p>Loading reroll status</p></div>
+              <div class="avail-tag" id="rerollTag" style="display:none">READY</div>
+            </div>
+            <div class="reroll-btns" id="rerollBtns" style="display:none">
+              <button class="reroll-btn safe" onclick="openRerollModal('safe')">⚡ SAFE REROLL</button>
+              <button class="reroll-btn risky" onclick="openRerollModal('risky')">🔥 RISKY REROLL</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">🏥 Injury Pool</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">30 coins each</span></div>
+          <div class="injury-item"><div><div class="injury-name">E. Suárez</div><div class="injury-pos">3B · ARI · Silver</div></div><div class="injury-cost">30 🪙</div><button class="add-btn">Add</button></div>
+          <div class="injury-item"><div><div class="injury-name">B. Nimmo</div><div class="injury-pos">OF · NYM · Bronze</div></div><div class="injury-cost">30 🪙</div><button class="add-btn">Add</button></div>
+          <div class="injury-item"><div><div class="injury-name">M. Stroman</div><div class="injury-pos">SP · CHC · Silver</div></div><div class="injury-cost">30 🪙</div><button class="add-btn">Add</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+<script type="module">
+import { supabase } from './supabase.js'
+import { findAvatar } from './avatars.js'
+import { findSkin } from './packskins.js'
+
+// Returns the CSS class that reskins a card's interior background/text
+// to the equipped skin's palette (see the `.skin-X` rules in <style>).
+// Tier border/box-shadow are untouched by that class, so rarity still
+// reads at a glance. Classic (or no skin) adds no class at all.
+function skinClass(skinId) {
+  return (skinId && skinId !== 'classic') ? `skin-${skinId}` : ''
+}
+// Which `.fill-X` solid color paints inside the silhouette mask.
+function skinFillClass(skinId) {
+  return (skinId && skinId !== 'classic') ? `fill-${skinId}` : 'fill-classic'
+}
+
+const BATTER_POS  = ['C','1B','2B','3B','SS','OF','DH','LF','CF','RF','UTIL']
+const PITCHER_POS = ['SP','RP','P']
+const NFL_OFFENSE_POS = ['QB','RB','WR','TE']
+const NFL_ST_DEF_POS  = ['K','DST','DEF']
+const BATTER_IMG  = 'art/batter.png'
+const PITCHER_IMG = 'art/pitcher-dash.png'
+const QB_IMG = 'art/qb.png'
+const RB_IMG = 'art/rb.png'
+const WR_IMG = 'art/wr.png'
+const TE_IMG = 'art/wr.png'
+const K_IMG = 'art/k.png'
+
+const DST_IMG = 'art/dst.png'
+
+function getCardImg(sport, pos) {
+  if (sport === 'NFL') {
+    const map = { QB: QB_IMG, RB: RB_IMG, WR: WR_IMG, TE: TE_IMG, K: K_IMG, DST: DST_IMG, DEF: DST_IMG }
+    return map[pos] || DST_IMG
+  }
+  return PITCHER_POS.includes(pos) ? PITCHER_IMG : BATTER_IMG
+}
+
+function buildCard(r, sport, skinId) {
+  const p   = r.players
+  const pts = p.actual_points || 0
+  const img = getCardImg(sport, p.position)
+  // NFL silhouettes are all drawn as standing single figures, same
+  // proportions as the MLB pitcher art, so they share that art slot's sizing.
+  const isPitcher = sport === 'NFL' || PITCHER_POS.includes(p.position)
+  const tierVals = {legendary:'👑',platinum:'100',gold:'60',silver:'25',bronze:'10'}
+  const ptsHtml  = p.is_injured
+    ? `<div class="card-pts injured">INJURED</div>`
+    : pts > 0 ? `<div class="card-pts">+${pts} pts</div>` : `<div class="card-pts zero">--</div>`
+  return `<div class="player-card ${p.tier} ${skinClass(skinId)}">
+    <div class="card-rays"></div><div class="card-glow"></div><div class="card-shine"></div>
+    <div class="card-tier">${p.tier.toUpperCase()}</div>
+    <div class="card-coin">${tierVals[p.tier]||''}</div>
+    <div class="${isPitcher ? 'card-art-pitcher' : 'card-art-batter'}"><div class="card-art-fill ${skinFillClass(skinId)}" style="-webkit-mask-image:url(${img});mask-image:url(${img});" role="img" aria-label="${p.name}"></div></div>
+    <div class="card-divider"></div>
+    ${p.is_injured ? '<div class="card-injured-overlay"><span class="injured-badge">🏥 IL</span></div>' : ''}
+    <div class="card-info">
+      <div class="card-name">${p.name}</div>
+      <div class="card-pos-team"><span>${p.position}</span><span>${p.team}</span></div>
+      ${ptsHtml}
+    </div>
+  </div>`
+}
+
+async function loadDashboard() {
+  // Check auth
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = 'login.html'; return }
+
+  let leagueId = localStorage.getItem('activeLeagueId')
+  let teamId   = localStorage.getItem('activeTeamId')
+
+  // If localStorage is missing, look up from Supabase
+  if (!leagueId || !teamId) {
+    const { data: team } = await supabase
+      .from('teams')
+      .select('id, league_id')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (!team) {
+      document.getElementById('noLeagueMsg').style.display = 'block'
+      document.getElementById('batterCards').innerHTML = ''
+      return
+    }
+    teamId   = team.id
+    leagueId = team.league_id
+    localStorage.setItem('activeTeamId', teamId)
+    localStorage.setItem('activeLeagueId', leagueId)
+  }
+
+  // Load team
+  const { data: team } = await supabase.from('teams').select('*').eq('id', teamId).single()
+  if (team) {
+    document.getElementById('coinAmount').textContent = team.coins
+    document.getElementById('coinSub').textContent = `${team.coins} coins this week`
+    const coinFill = document.getElementById('coinFill')
+    if (coinFill) coinFill.style.width = Math.min((team.coins / 500) * 100, 100) + '%'
+    const userAvatarEl = document.getElementById('userAvatar')
+    const av = findAvatar(team.avatar_id)
+    if (av) {
+      userAvatarEl.textContent = av.emoji
+      userAvatarEl.style.background = av.color
+    } else {
+      userAvatarEl.textContent = team.team_name.slice(0,2).toUpperCase()
+      userAvatarEl.style.background = ''
+    }
+  }
+
+  // Load league
+  const { data: league } = await supabase.from('leagues').select('*').eq('id', leagueId).single()
+  if (league) {
+    document.getElementById('topbarTitle').textContent = league.name
+    document.getElementById('weekPill').textContent = `WEEK ${league.week_number} OF 18`
+    document.getElementById('leagueNameText').textContent = league.name || 'League'
+    localStorage.setItem('activeLeagueWeek', String(league.week_number || 1))
+    document.getElementById('sportPill').textContent = league.mode === 'daily' ? `${league.name} · DAILY` : `${league.name}`
+    // Set sport from league row immediately — reliable even if roster is empty
+    if (league.sport) {
+      localStorage.setItem('activeSport', league.sport)
+      const sportPill = document.getElementById('sportPill')
+      sportPill.textContent = league.sport
+      sportPill.style.color = league.sport === 'NFL' ? 'var(--green)' : 'var(--blue)'
+      sportPill.style.borderColor = league.sport === 'NFL' ? 'var(--green)' : 'var(--blue)'
+      document.getElementById('sidebarSportSub').textContent = `${league.sport} · SEASON 2026`
+    }
+  }
+
+  // Load roster
+  const { data: roster } = await supabase
+    .from('rosters')
+    .select('*, players(id,name,position,team,tier,tier_value,actual_points,projected_points,is_injured,sport)')
+    .eq('team_id', teamId)
+    .eq('is_active', true)
+
+  if (!roster || roster.length === 0) {
+    document.getElementById('batterCards').innerHTML = '<div style="padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--muted);">No players on roster yet.</div>'
+    // Don't return — let init() continue so legendary/reroll/feed widgets still load
+  }
+
+  // Sport is only ever trustworthy from the leagues.sport column — never
+  // guess it from the roster (which can easily be empty) or from a stale
+  // localStorage value left over from a different league.
+  const sport = league?.sport || roster?.find(r => r.players?.sport)?.players?.sport || localStorage.getItem('activeSport') || 'MLB'
+  localStorage.setItem('activeSport', sport)
+  document.getElementById('sportPill').textContent = sport
+  document.getElementById('sportPill').style.color = sport === 'NFL' ? 'var(--green)' : 'var(--blue)'
+  document.getElementById('sportPill').style.borderColor = sport === 'NFL' ? 'var(--green)' : 'var(--blue)'
+  document.getElementById('sidebarSportSub').textContent = `${sport} · SEASON 2026`
+
+  // Split the roster into its two display groups — guard against null roster.
+  // MLB splits batters/pitchers; NFL splits offense/special-teams+defense,
+  // since BATTER_POS/PITCHER_POS don't cover QB/RB/WR/TE/K/DST at all.
+  const safeRoster = roster || []
+  let group1, group2, title1, title2, empty1, empty2
+  if (sport === 'NFL') {
+    group1 = safeRoster.filter(r => r.players && NFL_OFFENSE_POS.includes(r.players.position))
+    group2 = safeRoster.filter(r => r.players && NFL_ST_DEF_POS.includes(r.players.position))
+    title1 = 'Active Roster — Offense'
+    title2 = 'Active Roster — Special Teams & D'
+    empty1 = 'No offensive players on roster'
+    empty2 = 'No special teams or defense on roster'
+  } else {
+    group1 = safeRoster.filter(r => r.players && BATTER_POS.includes(r.players.position))
+    group2 = safeRoster.filter(r => r.players && PITCHER_POS.includes(r.players.position))
+    title1 = 'Active Roster'
+    title2 = 'Active Roster — Pitchers'
+    empty1 = 'No batters on roster'
+    empty2 = 'No pitchers on roster'
+  }
+  const rosterTitleEl = document.getElementById('rosterTitle')
+  const rosterTitle2El = document.getElementById('rosterTitle2')
+  if (rosterTitleEl) rosterTitleEl.textContent = title1
+  if (rosterTitle2El) rosterTitle2El.textContent = title2
+
+  const equippedSkin = team?.equipped_skin || 'classic'
+  document.getElementById('batterCards').innerHTML  = group1.length ? group1.map(r => buildCard(r, sport, equippedSkin)).join('') : `<div style="padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--muted);">${empty1}</div>`
+  document.getElementById('pitcherCards').innerHTML = group2.length ? group2.map(r => buildCard(r, sport, equippedSkin)).join('')  : `<div style="padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--muted);">${empty2}</div>`
+
+  // Update stats
+  const totalPts   = safeRoster.reduce((s,r) => s + (r.players?.actual_points||0), 0)
+  const capUsed    = safeRoster.reduce((s,r) => s + (r.players?.tier_value||0), 0)
+  const injured    = safeRoster.filter(r => r.players?.is_injured)
+  const capPct     = Math.min((capUsed / 500) * 100, 100)
+
+  document.getElementById('statWeekScore').textContent = totalPts
+  document.getElementById('statCapUsed').textContent   = capUsed
+  document.getElementById('statCapNote').textContent   = `${Math.max(0, 500 - capUsed)} remaining of 500`
+  document.getElementById('statInjuries').textContent  = injured.length
+  document.getElementById('statInjuryNote').textContent = injured.length > 0 ? injured.map(r => r.players.name.split(' ')[1] || r.players.name).join(', ') + ' on IL' : 'All healthy'
+  document.getElementById('capBarVal').textContent     = `${capUsed} / 500`
+  document.querySelector('.cap-bar-fill').style.width  = capPct + '%'
+}
+
+// ── LIVE FEED ──
+async function loadLiveFeed() {
+  const leagueId = localStorage.getItem('activeLeagueId') || ''
+  const container = document.getElementById('liveFeedContainer')
+  if (!container || !leagueId) return
+  try {
+    const { data: events } = await supabase
+      .from('live_feed')
+      .select('*, players(name, position, team)')
+      .eq('league_id', leagueId)
+      .order('created_at', { ascending: false })
+      .limit(50)
+    if (!events || events.length === 0) {
+      container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">No activity yet this week.</div>'
+      return
+    }
+    const iconMap = { score: '💣', hit: '⚾', pitch: '🔥', injury: '🏥', legendary: '👑', trade: '🔄', pack: '🎁', auction_win: '🏷️' }
+    container.innerHTML = events.map(e => {
+      const icon = iconMap[e.event_type] || '📊'
+      const playerName = e.players ? '<strong>' + e.players.name + '</strong>' : '<strong>Player</strong>'
+      const pts = e.points ? '<span class="feed-pts">+' + e.points + ' pts' + (e.is_legendary_bonus ? ' legendary bonus!' : '') + '</span>' : ''
+      const alert = e.is_injury ? '<span class="feed-alert">check injury pool</span>' : ''
+      const ago = timeAgo(e.created_at)
+      const game = e.game_info || ''
+      return '<div class="feed-item"><div class="feed-icon">' + icon + '</div><div><div class="feed-main">' + playerName + ' ' + (e.description || '') + ' ' + pts + alert + '</div><div class="feed-time">' + ago + (game ? ' · ' + game : '') + '</div></div></div>'
+    }).join('')
+  } catch(err) {
+    container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">No league activity yet.</div>'
+  }
+}
+
+function timeAgo(ts) {
+  if (!ts) return ''
+  const mins = Math.floor((Date.now() - new Date(ts)) / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + ' min ago'
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return hrs + ' hr ago'
+  return Math.floor(hrs/24) + ' d ago'
+}
+
+// ── AUCTION HOUSE ──
+// Shows top 5 players currently in the auction_pool for this league
+async function loadAuctionHouse() {
+  const leagueId = localStorage.getItem('activeLeagueId') || ''
+  const container = document.getElementById('auctionContainer')
+  if (!container || !leagueId) return
+  try {
+    // Pull directly from auction_pool — same source as auction.html
+    const { data: pool } = await supabase
+      .from('auction_pool')
+      .select('floor_price, pool_type, players(id, name, position, team, tier, tier_value)')
+      .eq('league_id', leagueId)
+      .eq('is_active', true)
+      .order('floor_price', { ascending: false })
+      .limit(5)
+
+    const players = (pool || []).map(item => ({ ...item.players, floor: item.floor_price, pool_type: item.pool_type }))
+
+    if (players.length === 0) {
+      container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">No auction players available.</div>'
+      return
+    }
+
+    const tierClass = { Platinum: 'platinum', Gold: 'gold', Silver: 'silver', Bronze: 'bronze' }
+    const tierAbbr  = { Platinum: 'PT', Gold: 'GD', Silver: 'SV', Bronze: 'BR' }
+    container.innerHTML = players.map(p => {
+      const cls  = tierClass[p.tier] || 'silver'
+      const abbr = tierAbbr[p.tier] || 'SV'
+      return '<div class="auction-item"><div class="auction-badge ' + cls + '">' + abbr + '</div><div class="auction-info"><div class="auction-name">' + p.name + '</div><div class="auction-pos">' + p.position + ' · ' + p.team + '</div></div><div class="auction-meta"><div class="auction-floor">Floor: ' + (p.floor || 0) + '</div></div></div>'
+    }).join('')
+  } catch(err) {
+    container.innerHTML = '<div style="padding:4px 0;color:var(--muted);">Unavailable.</div>'
+  }
+}
+
+// ── STARTUP: load in order so activeSport is set before widgets run ──
+async function init() {
+  await loadDashboard()
+  // activeSport + leagueId + teamId now set — fire everything
+  loadRerollStatus()
+  loadLegendaryWidget()
+  loadLiveFeed()
+  loadAuctionHouse()
+}
+init()
+
+
+// ── REROLL SYSTEM ──
+let _rerollType = 'safe'
+let _rerollRoster = []
+let _rerollLeagueMode = 'weekly'
+let _rerollTeamId = ''
+let _rerollLeagueId = ''
+let _rerollSport = 'MLB'
+
+async function loadRerollStatus() {
+  try {
+    const leagueId = localStorage.getItem('activeLeagueId') || ''
+    const teamId   = localStorage.getItem('activeTeamId') || ''
+    _rerollTeamId   = teamId
+    _rerollLeagueId = leagueId
+
+    if (!leagueId || !teamId) {
+      const statusText = document.getElementById('rerollStatusText')
+      const tag        = document.getElementById('rerollTag')
+      const btns       = document.getElementById('rerollBtns')
+      if (statusText) statusText.innerHTML = '<h4>1 Reroll Available</h4><p>Swap up to 5 players for new ones</p>'
+      if (tag) { tag.textContent = 'READY'; tag.style.display = 'block'; tag.style.color = 'var(--green)'; tag.style.borderColor = 'rgba(39,201,106,0.4)' }
+      if (btns) btns.style.display = 'grid'
+      return
+    }
+
+    const [{ data: team }, { data: league }] = await Promise.all([
+      supabase.from('teams').select('id, last_reroll_at').eq('id', teamId).single(),
+      supabase.from('leagues').select('mode, week_number').eq('id', leagueId).single()
+    ])
+
+    if (!team || !league) {
+      const statusText = document.getElementById('rerollStatusText')
+      const tag        = document.getElementById('rerollTag')
+      const btns       = document.getElementById('rerollBtns')
+      if (statusText) statusText.innerHTML = '<h4>1 Reroll Available</h4><p>Swap up to 5 players for new ones</p>'
+      if (tag) { tag.textContent = 'READY'; tag.style.display = 'block'; tag.style.color = 'var(--green)'; tag.style.borderColor = 'rgba(39,201,106,0.4)' }
+      if (btns) btns.style.display = 'grid'
+      return
+    }
+
+    _rerollLeagueMode = league.mode || 'weekly'
+    _rerollSport      = localStorage.getItem('activeSport') || 'MLB'
+
+    const titleEl = document.getElementById('rerollPanelTitle')
+    if (titleEl) titleEl.textContent = _rerollLeagueMode === 'daily' ? 'Daily Reroll' : 'Weekly Reroll'
+
+    const now = new Date()
+    let available = true
+    if (team.last_reroll_at) {
+      const lastReroll = new Date(team.last_reroll_at)
+      if (_rerollLeagueMode === 'daily') {
+        available = lastReroll.toDateString() !== now.toDateString()
+      } else {
+        available = (now - lastReroll) > 7 * 24 * 60 * 60 * 1000
+      }
+    }
+
+    const statusText = document.getElementById('rerollStatusText')
+    const tag        = document.getElementById('rerollTag')
+    const btns       = document.getElementById('rerollBtns')
+
+    if (available) {
+      if (statusText) statusText.innerHTML = '<h4>1 Reroll Available</h4><p>Swap up to 5 players for new ones</p>'
+      if (tag) { tag.textContent = 'READY'; tag.style.display = 'block'; tag.style.color = 'var(--green)'; tag.style.borderColor = 'rgba(39,201,106,0.4)' }
+      if (btns) btns.style.display = 'grid'
+    } else {
+      let unitLabel
+      if (_rerollLeagueMode === 'daily') {
+        const tomorrow = new Date(now)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0,0,0,0)
+        const nextMs = tomorrow - now
+        const h = Math.floor(nextMs / 3600000)
+        const m = Math.floor((nextMs % 3600000) / 60000)
+        unitLabel = h + 'H ' + m + 'M'
+      } else {
+        const nextReroll = new Date(new Date(team.last_reroll_at).getTime() + 7 * 24 * 60 * 60 * 1000)
+        const nextMs = nextReroll - now
+        const d = Math.floor(nextMs / 86400000)
+        const h = Math.floor((nextMs % 86400000) / 3600000)
+        unitLabel = d + 'D ' + h + 'H'
+      }
+      if (statusText) statusText.innerHTML = '<h4>Reroll Used</h4><p>Next reroll in ' + unitLabel + '</p>'
+      if (tag) { tag.textContent = 'USED'; tag.style.display = 'block'; tag.style.color = 'var(--muted)'; tag.style.borderColor = 'var(--border2)' }
+      if (btns) btns.style.display = 'none'
+    }
+  } catch(e) {
+    console.error('Reroll status error:', e)
+    const statusText = document.getElementById('rerollStatusText')
+    const tag        = document.getElementById('rerollTag')
+    const btns       = document.getElementById('rerollBtns')
+    if (statusText) statusText.innerHTML = '<h4>1 Reroll Available</h4><p>Swap up to 5 players for new ones</p>'
+    if (tag) { tag.textContent = 'READY'; tag.style.display = 'block'; tag.style.color = 'var(--green)'; tag.style.borderColor = 'rgba(39,201,106,0.4)' }
+    if (btns) btns.style.display = 'grid'
+  }
+}
+
+async function openRerollModal(type) {
+  _rerollType = type
+  _rerollRoster = []
+  document.getElementById('rerollModalTitle').textContent = type === 'safe' ? 'SAFE REROLL' : 'RISKY REROLL'
+  document.getElementById('rerollModalDesc').textContent = type === 'safe'
+    ? 'Select exactly 5 players — get same-tier replacements. FREE.'
+    : 'Select exactly 5 players — weighted odds to upgrade or downgrade. Costs coins per tier.'
+  document.getElementById('rerollSelectedCount').textContent = '0'
+  document.getElementById('rerollCostDisplay').textContent = type === 'safe' ? 'Cost: FREE' : 'Cost: 0 coins'
+  document.getElementById('btnConfirmReroll').disabled = true
+  document.getElementById('btnConfirmReroll').style.opacity = '0.4'
+
+  // NOTE: is_active means "in starting lineup", NOT "on roster".
+  // Reroll should include the whole roster (lineup + bench), so don't filter on is_active.
+  const { data: roster, error: rosterErr } = await supabase
+    .from('rosters')
+    .select('id, slot, is_keeper, is_active, players(id,name,position,team,tier)')
+    .eq('team_id', _rerollTeamId)
+
+  const eligible = (roster || []).filter(r => r.players && !['K','DST'].includes(r.players.position) && !r.is_keeper)
+
+  const listEl = document.getElementById('rerollPlayerList')
+  listEl.innerHTML = eligible.map(r =>
+    '<div id="rri_' + r.id + '" onclick="toggleRerollPlayer(\'' + r.id + '\',\'' + r.players.tier + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s;">' +
+    '<div style="width:36px;height:36px;border-radius:6px;background:rgba(245,197,24,0.1);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:9px;color:var(--gold);">' + r.players.tier.slice(0,2).toUpperCase() + '</div>' +
+    '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + r.players.name + '</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">' + r.players.position + ' · ' + r.players.team + ' · ' + r.players.tier + '</div></div>' +
+    '<div id="rri_chk_' + r.id + '" style="width:20px;height:20px;border-radius:4px;border:1px solid var(--border2);"></div></div>'
+  ).join('')
+
+  document.getElementById('rerollModal').style.display = 'flex'
+}
+
+function closeRerollModal() { document.getElementById('rerollModal').style.display = 'none' }
+
+function toggleRerollPlayer(rosterId, tier) {
+  const idx = _rerollRoster.findIndex(r => r.id === rosterId)
+  const chk = document.getElementById('rri_chk_' + rosterId)
+  const row = document.getElementById('rri_' + rosterId)
+  if (idx >= 0) {
+    _rerollRoster.splice(idx, 1)
+    chk.style.background = ''; chk.style.borderColor = 'var(--border2)'
+    row.style.borderColor = 'var(--border)'; row.style.background = ''
+  } else {
+    if (_rerollRoster.length >= 5) return
+    _rerollRoster.push({ id: rosterId, tier })
+    chk.style.background = 'var(--gold)'; chk.style.borderColor = 'var(--gold)'
+    row.style.borderColor = 'var(--gold)'; row.style.background = 'rgba(245,197,24,0.05)'
+  }
+  const count = _rerollRoster.length
+  document.getElementById('rerollSelectedCount').textContent = count
+
+  // Update cost display for risky reroll
+  if (_rerollType === 'risky') {
+    const RISKY_COST = { bronze: 10, silver: 20, gold: 40, platinum: 80 }
+    const total = _rerollRoster.reduce((sum, r) => sum + (RISKY_COST[r.tier.toLowerCase()] || 10), 0)
+    document.getElementById('rerollCostDisplay').textContent = count > 0 ? `Cost: ${total} coins` : 'Cost: 0 coins'
+    const btn = document.getElementById('btnConfirmReroll')
+    btn.disabled = count !== 5; btn.style.opacity = count === 5 ? '1' : '0.4'
+    if (count === 5) btn.textContent = `CONFIRM REROLL — ${total} COINS`
+    else btn.textContent = 'CONFIRM REROLL'
+  } else {
+    const btn = document.getElementById('btnConfirmReroll')
+    btn.disabled = count !== 5; btn.style.opacity = count === 5 ? '1' : '0.4'
+    btn.textContent = count === 5 ? 'CONFIRM REROLL — FREE' : 'CONFIRM REROLL'
+  }
+}
+
+async function confirmReroll() {
+  if (_rerollRoster.length !== 5) return
+  const btn = document.getElementById('btnConfirmReroll')
+  btn.textContent = 'Processing...'; btn.disabled = true
+
+  try {
+    const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum']
+    const needed = _rerollRoster.length // should always be 5
+
+    // Step 1: get all player IDs already rostered in this league
+    // (excludes free agents — same pool injury.html uses)
+    const { data: leagueRosters } = await supabase
+      .from('rosters')
+      .select('player_id')
+      .eq('league_id', _rerollLeagueId)
+    // Remove the players being rerolled FROM takenIds — they're being released
+    const rerollingPlayerIds = _rerollRoster.map(r => r.id) // these are roster row IDs, not player IDs
+    // We need player_ids of the ones being dropped so we can exclude them from takenIds
+    const { data: rerollingRows } = await supabase
+      .from('rosters')
+      .select('player_id')
+      .in('id', rerollingPlayerIds)
+    const rerollingPlayerPids = (rerollingRows || []).map(r => r.player_id)
+    const takenIds = (leagueRosters || [])
+      .map(r => r.player_id)
+      .filter(id => id && !rerollingPlayerPids.includes(id))
+
+    // Step 2: for each selected player, find a free agent replacement at the right tier
+    let newPlayers = []
+    const usedNewIds = [] // prevent duplicates within this reroll
+
+    // Risky tier cost map
+    const RISKY_COST = { bronze: 10, silver: 20, gold: 40, platinum: 80 }
+
+    // Weighted odds for risky reroll per tier
+    // Returns the tier to search for, based on weighted random
+    function riskyTierRoll(tier) {
+      const t = tier.toLowerCase()
+      const roll = Math.random() * 100
+      if (t === 'bronze') {
+        // 94.99% Bronze, 5% Silver, 0.01% Gold
+        if (roll < 94.99) return 'Bronze'
+        if (roll < 99.99) return 'Silver'
+        return 'Gold'
+      } else if (t === 'silver') {
+        // 70% Silver, 25% Bronze, 5% Gold
+        if (roll < 70) return 'Silver'
+        if (roll < 95) return 'Bronze'
+        return 'Gold'
+      } else if (t === 'gold') {
+        // 70% Gold, 25% Silver, 5% Platinum
+        if (roll < 70) return 'Gold'
+        if (roll < 95) return 'Silver'
+        return 'Platinum'
+      } else {
+        // Platinum: 70% Platinum, 25% Gold, 5% Silver
+        if (roll < 70) return 'Platinum'
+        if (roll < 95) return 'Gold'
+        return 'Silver'
+      }
+    }
+
+    // Deduct coins for risky reroll before processing
+    if (_rerollType === 'risky') {
+      const totalCost = _rerollRoster.reduce((sum, r) => sum + (RISKY_COST[r.tier.toLowerCase()] || 10), 0)
+      const { data: teamData } = await supabase.from('teams').select('coins').eq('id', _rerollTeamId).single()
+      const currentCoins = teamData?.coins ?? 0
+      if (currentCoins < totalCost) {
+        showToast(`Not enough coins! Need ${totalCost}, have ${currentCoins}.`, 'error')
+        btn.textContent = `CONFIRM REROLL — ${totalCost} COINS`; btn.disabled = false; btn.style.opacity = '1'
+        return
+      }
+      await supabase.from('teams').update({ coins: currentCoins - totalCost }).eq('id', _rerollTeamId)
+    }
+
+    for (const selected of _rerollRoster) {
+      // Determine which tier to search for
+      let targetTier = selected.tier
+      if (_rerollType === 'risky') {
+        targetTier = riskyTierRoll(selected.tier)
+      }
+
+      const excludeIds = [...takenIds, ...usedNewIds]
+      let query = supabase.from('players').select('id,name,position,team,tier')
+        .eq('sport', _rerollSport)
+        .eq('tier', targetTier)
+        .not('position', 'in', '(K,DST)')
+      if (excludeIds.length > 0) {
+        query = query.not('id', 'in', '(' + excludeIds.join(',') + ')')
+      }
+      const { data: candidates, error: cErr } = await query
+      if (cErr) { console.error('Candidate query error:', cErr); }
+
+      // If no candidates at rolled tier, fall back to same tier
+      let finalCandidates = candidates
+      if (!finalCandidates || finalCandidates.length === 0) {
+        let fallback = supabase.from('players').select('id,name,position,team,tier')
+          .eq('sport', _rerollSport)
+          .eq('tier', selected.tier)
+          .not('position', 'in', '(K,DST)')
+        if (excludeIds.length > 0) {
+          fallback = fallback.not('id', 'in', '(' + excludeIds.join(',') + ')')
+        }
+        const { data: fallbackData } = await fallback
+        finalCandidates = fallbackData
+      }
+
+      if (!finalCandidates || finalCandidates.length === 0) {
+        showToast('Not enough free agents available for reroll.', 'error')
+        btn.textContent = 'CONFIRM REROLL'; btn.disabled = false; btn.style.opacity = '1'
+        return
+      }
+
+      const pick = finalCandidates[Math.floor(Math.random() * finalCandidates.length)]
+      newPlayers.push(pick)
+      usedNewIds.push(pick.id)
+    }
+
+    // Step 3: delete the 5 selected roster slots
+    for (const rid of _rerollRoster.map(r => r.id)) {
+      await supabase.from('rosters').delete().eq('id', rid)
+    }
+
+    // Step 4: insert 5 new roster slots
+    for (const np of newPlayers) {
+      await supabase.from('rosters').insert({
+        team_id: _rerollTeamId,
+        league_id: _rerollLeagueId,
+        player_id: np.id,
+        slot: np.position,
+        is_active: true,
+        is_keeper: false
+      })
+    }
+
+    await supabase.from('teams').update({ last_reroll_at: new Date().toISOString() }).eq('id', _rerollTeamId)
+
+    closeRerollModal()
+    showToast('Reroll complete! Check your roster.', 'success')
+    await loadRerollStatus()
+    location.reload()
+  } catch(e) {
+    console.error('Reroll error:', e)
+    showToast('Reroll failed. Try again.', 'error')
+    btn.textContent = 'CONFIRM REROLL'; btn.disabled = false; btn.style.opacity = '1'
+  }
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div')
+  t.className = 'toast ' + type; t.textContent = msg
+  document.body.appendChild(t)
+  setTimeout(() => t.classList.add('show'), 10)
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400) }, 3000)
+}
+
+// ── LEGENDARY WIDGET ──
+async function loadLegendaryWidget() {
+  try {
+    const leagueId = localStorage.getItem('activeLeagueId') || ''
+    const teamId   = localStorage.getItem('activeTeamId')   || ''
+
+    // Always fetch sport directly from the league row — don't trust localStorage
+    let sport = 'MLB'
+    if (leagueId) {
+      const { data: lg } = await supabase.from('leagues').select('sport').eq('id', leagueId).single()
+      if (lg && lg.sport) {
+        sport = lg.sport
+        localStorage.setItem('activeSport', sport)
+      }
+    }
+
+    function getCurrentWeek() {
+      // Use league week number to stay in sync with legendary tab and auction
+      return parseInt(localStorage.getItem('activeLeagueWeek') || '1') - 1
+    }
+    function leagueOffset(id) {
+      if (!id) return 0
+      let h = 0
+      for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+      return h
+    }
+
+    const week   = getCurrentWeek()
+    const offset = leagueOffset(leagueId)
+
+    // Check pre-reserved legendary card for this league/week
+    let card = null
+
+    const { data: reserved } = await supabase
+      .from('league_legendary')
+      .select('*, legendary_players(*)')
+      .eq('league_id', leagueId)
+      .eq('week_number', week + 1)
+      .maybeSingle()
+
+    if (reserved?.legendary_players) {
+      card = reserved.legendary_players
+    } else {
+      const { data } = await supabase
+        .from('legendary_players').select('*')
+        .eq('sport', sport).eq('is_active', true)
+        .order('year', { ascending: true })
+        .order('player_name', { ascending: true })
+
+      const { data: rosteredNow } = await supabase.from('rosters').select('player_id').eq('league_id', leagueId)
+      const rosteredIds = new Set((rosteredNow || []).map(r => r.player_id).filter(Boolean))
+      const allCards  = (data || []).filter(c => !rosteredIds.has(c.player_id))
+      const unclaimed = allCards.filter(c => !c.is_claimed)
+
+      if (unclaimed.length > 0) {
+        card = unclaimed[(week + offset) % unclaimed.length]
+      } else if (allCards.length > 0) {
+        card = allCards.find(c => c.owner_team_id === teamId) || allCards[allCards.length - 1]
+      }
+    }
+
+    const widget = document.getElementById('legWidget')
+    const claimBtn = document.getElementById('legClaimBtn')
+    const timeEl = document.getElementById('legTimeLeft')
+
+    if (!card) {
+      widget.innerHTML = '<div style="padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--muted);">No legendary card available.</div>'
+      return
+    }
+
+    const claimed  = card.is_claimed
+    const ownedByMe = card.owner_team_id === teamId
+
+    // Time left in week (days + hours)
+    const msInWeek = 7 * 24 * 60 * 60 * 1000
+    const SEASON_START = new Date('2025-09-04')
+    const elapsed = (new Date() - SEASON_START) % msInWeek
+    const remaining = msInWeek - elapsed
+    const daysLeft  = Math.floor(remaining / (24 * 60 * 60 * 1000))
+    const hoursLeft = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000))
+    if (timeEl) timeEl.textContent = claimed ? '' : `${daysLeft}D ${hoursLeft}H LEFT`
+
+    // Sport silhouette — position-aware
+    // For MLB: pitchers (SP/RP/P) use PITCHER_IMG, everyone else uses BATTER_IMG
+    // For NFL: all positions use PITCHER_IMG (arm-extended passer silhouette)
+    function getSilhouette(s, pos) {
+      if (s === 'NFL' || s === 'nfl') {
+        const nflMap = { QB: QB_IMG, RB: RB_IMG, WR: WR_IMG, TE: TE_IMG, K: K_IMG }
+        return nflMap[pos] || WR_IMG
+      }
+      const pitcherPos = ['SP', 'RP', 'P', 'SP/DH']
+      return pitcherPos.includes(pos) ? PITCHER_IMG : BATTER_IMG
+    }
+    const artImg = getSilhouette(sport, card.position)
+
+    const b1 = card.boost_1_label ? `<div class="boost-item"><span>${card.boost_1_label}</span><span class="boost-pts">+${card.boost_1_points} pts</span></div>` : ''
+    const b2 = card.boost_2_label ? `<div class="boost-item"><span>${card.boost_2_label}${card.boost_2_dual_fire ? ' <span style="color:#f5a623">🔥 DUAL</span>' : ''}</span><span class="boost-pts">+${card.boost_2_points} pts</span></div>` : ''
+
+    const statusBadge = claimed
+      ? (ownedByMe ? '👑 YOU OWN THIS' : '🔒 CLAIMED')
+      : '⬦ Legendary Card Available'
+
+    widget.style.opacity = claimed ? '0.7' : '1'
+    widget.innerHTML = `
+      <div class="leg-badge">${statusBadge}</div>
+      <div class="leg-card-visual">
+        <div class="leg-timer">${claimed ? '' : `${daysLeft}D ${hoursLeft}H LEFT`}</div>
+        <div class="leg-player-art">
+          <img src="${artImg}" style="height:120px;width:auto;filter:drop-shadow(0 0 18px rgba(255,160,0,0.8));" alt="">
+        </div>
+        <div class="leg-player-info">
+          <div class="leg-crown">👑</div>
+          <div class="leg-name">${card.player_name}</div>
+          <div class="leg-detail">${card.position} · ${card.team} · ${card.year}</div>
+        </div>
+      </div>
+      <div class="boost-list">${b1}${b2}</div>
+      <div class="cost-box"><strong>Trade-in Required:</strong> Sacrifice cards totaling <strong>100+ coin value</strong> from your roster to claim.</div>
+    `
+
+    if (!claimed && claimBtn) claimBtn.style.display = 'block'
+
+  } catch(e) {
+    console.error('Legendary widget error:', e)
+    const widget = document.getElementById('legWidget')
+    if (widget) widget.innerHTML = `<div style="padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--red);word-break:break-all;">
+      <div style="color:#f5c518;margin-bottom:8px;">⚠ LEGENDARY WIDGET ERROR</div>
+      <div><b>Message:</b> ${e.message}</div>
+      <div><b>leagueId:</b> ${localStorage.getItem('activeLeagueId') || 'MISSING'}</div>
+      <div><b>teamId:</b> ${localStorage.getItem('activeTeamId') || 'MISSING'}</div>
+      <div><b>sport:</b> ${localStorage.getItem('activeSport') || 'MISSING'}</div>
+    </div>`
+  }
+}
+
+// Expose functions to global scope (required for onclick handlers with type="module")
+// Load trade badge count
+async function loadTradeBadge() {
+  const teamId = localStorage.getItem('activeTeamId') || ''
+  if (!teamId) return
+  const { count } = await supabase.from('trades').select('id', { count: 'exact', head: true }).eq('receiver_team_id', teamId).eq('status', 'pending')
+  const badge = document.getElementById('tradeBadge')
+  if (badge && count > 0) { badge.textContent = count; badge.style.display = '' }
+}
+loadTradeBadge()
+
+// ── LEAGUE SWITCHER ──
+window.toggleLeagueDropdown = async function(e) {
+  e.stopPropagation()
+  const dropdown = document.getElementById('leagueDropdown')
+  const isOpen = dropdown.style.display !== 'none'
+  dropdown.style.display = isOpen ? 'none' : 'block'
+  if (isOpen) return
+  const listEl = document.getElementById('leagueDropdownList')
+  listEl.innerHTML = '<div style="padding:12px;font-family:var(--font-mono);font-size:10px;color:var(--muted)">Loading...</div>'
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: teams } = await supabase
+    .from('teams')
+    .select('id, team_name, league_id, leagues(id, name, sport, week_number)')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (!teams || !teams.length) {
+    listEl.innerHTML = '<div style="padding:12px;font-family:var(--font-mono);font-size:10px;color:var(--muted)">No leagues found.</div>'
+    return
+  }
+
+  listEl.innerHTML = teams.map(t => {
+    const league = t.leagues
+    const isActive = t.league_id === localStorage.getItem('activeLeagueId')
+    return `<div onclick="switchLeague('${t.league_id}','${t.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;background:${isActive ? 'rgba(245,197,24,0.06)' : 'transparent'};transition:background 0.12s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='${isActive ? 'rgba(245,197,24,0.06)' : 'transparent'}'">
+      <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--green));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;color:white;flex-shrink:0">${(league?.name||'L')[0].toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:${isActive ? 'var(--gold)' : 'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${league?.name || 'League'}</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">${league?.sport || 'MLB'} · ${t.team_name||t.name}</div>
+      </div>
+      ${isActive ? '<span style="font-family:var(--font-mono);font-size:8px;color:var(--gold)">✓</span>' : ''}
+    </div>`
+  }).join('')
+}
+
+window.switchLeague = function(leagueId, teamId) {
+  localStorage.setItem('activeLeagueId', leagueId)
+  localStorage.setItem('activeTeamId',   teamId)
+  document.getElementById('leagueDropdown').style.display = 'none'
+  window.location.reload()
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', () => {
+  const dd = document.getElementById('leagueDropdown')
+  if (dd) dd.style.display = 'none'
+})
+
+window.openRerollModal   = openRerollModal
+window.closeRerollModal  = closeRerollModal
+window.toggleRerollPlayer = toggleRerollPlayer
+window.confirmReroll     = confirmReroll
+</script>
+
+<!-- ── REROLL MODAL ── -->
+<div id="rerollModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:90%;max-width:520px;display:flex;flex-direction:column;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div id="rerollModalTitle" style="font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:var(--gold);"></div>
+        <div id="rerollModalDesc" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:4px;"></div>
+      </div>
+      <button onclick="closeRerollModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;">✕</button>
+    </div>
+
+    <!-- Player list -->
+    <div style="padding:12px 16px;overflow-y:auto;max-height:60vh;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">SELECT EXACTLY 5 PLAYERS · <span id="rerollSelectedCount">0</span>/5 SELECTED</div>
+        <div id="rerollCostDisplay" style="font-family:var(--font-mono);font-size:10px;color:var(--gold);font-weight:700;">Cost: FREE</div>
+      </div>
+      <div id="rerollPlayerList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;">
+      <button onclick="closeRerollModal()" style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;">CANCEL</button>
+      <button id="btnConfirmReroll" onclick="confirmReroll()" style="flex:2;padding:12px;background:var(--gold);border:none;border-radius:8px;color:#000;font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;">CONFIRM REROLL</button>
+    </div>
+
+  </div>
+</div>
+
+
+</body>
+</html>
